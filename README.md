@@ -5,26 +5,26 @@
 The easiest method by far to download and run the application is to use pip to install it
 
 ```
-pip install dao-analyzer
+pip install dao-scripts
 ```
 
-Then, you can use this script using the command `daoa-cache-scripts`
+Then, you can use this script using the command `daoa-cache-scripts` or `dao-scripts`
 
 ### Download
 Enter in your terminal (git must be installed) and write down:
 
 ```
-git clone https://github.com/Grasia/dao-analyzer
+git clone https://github.com/Grasia/dao-scripts
 ```
 
-After that, move to repository root directory with:
+After that, move to the repository root directory with:
 
 ```
-cd dao-analyzer
+cd dao-scripts
 ```
 
 ### Installation
-All code has been tested on Linux, but it should work on Windows and macOS, 'cause it just uses the python environment.
+All code has been tested on Linux, but it should work on Windows and macOS, 'cause it just uses the Python environment.
 
 So, you must install the following dependencies to run the tool:
 
@@ -41,10 +41,10 @@ If you don't want to share Python dependencies among other projects, you should 
 If you want all the data used in the app, you can just use:
 
 ```
-python3 -m cache_scripts
+dao-scripts
 ```
 
-this will create a folder called `datawarehouse` with a lot of files in apache's arrow format.
+this will create a folder called `datawarehouse` with a lot of files in Apache's arrow format.
 
 You can import those files to `pandas` with `read_feather`. For example:
 
@@ -58,7 +58,7 @@ If you don't want all the data (and it can take a lot of time), you have a lot o
 ```
 usage: daoa-cache-scripts [-h] [-V] [-p [{aragon,daohaus,daostack} ...]]
                           [--ignore-errors | --no-ignore-errors] [-d] [-f] [-F] [--skip-daohaus-names]
-                          [-n {mainnet,_theGraph,arbitrum,xdai,polygon} [{mainnet,_theGraph,arbitrum,xdai,polygon} ...]]
+                          [-n {mainnet,arbitrum,xdai,polygon} [{mainnet,arbitrum,xdai,polygon} ...]]
                           [-c COLLECTORS [COLLECTORS ...]] [--block-datetime BLOCK_DATETIME]
                           [-D DATAWAREHOUSE] [--cc-api-key CC_API_KEY]
 
@@ -75,7 +75,7 @@ options:
   -f, --force           Removes the cache before updating
   -F, --delete-force    Removes the datawarehouse folder before doing anything
   --skip-daohaus-names  Skips the step of getting Daohaus Moloch's names, which takes some time
-  -n {mainnet,_theGraph,arbitrum,xdai,polygon} [{mainnet,_theGraph,arbitrum,xdai,polygon} ...], --networks {mainnet,_theGraph,arbitrum,xdai,polygon} [{mainnet,_theGraph,arbitrum,xdai,polygon} ...]
+    -n {mainnet,arbitrum,xdai,polygon} [{mainnet,arbitrum,xdai,polygon} ...], --networks {mainnet,arbitrum,xdai,polygon} [{mainnet,arbitrum,xdai,polygon} ...]
                         Networks to update. Every network is updated by default
   -c COLLECTORS [COLLECTORS ...], --collectors COLLECTORS [COLLECTORS ...]
                         Collectors to run. For example: aragon/casts
