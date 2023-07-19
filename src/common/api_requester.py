@@ -92,7 +92,7 @@ class GQLRequester:
             assert(self.__client.schema is not None)
             return DSLSchema(self.__client.schema)
 
-    def request(self, query: DSLQuery | DSLField | str) -> Dict:
+    def request(self, query: Union[DSLQuery, DSLField, str]) -> Dict:
         """
         Requests data from endpoint.
         """
@@ -111,7 +111,7 @@ class GQLRequester:
 
         return result
 
-    def request_single(self, q: DSLQuery | DSLField | str) -> Dict:
+    def request_single(self, q: Union[DSLQuery, DSLField, str]) -> Dict:
         result = self.request(q)
         if result and len(result.values()) == 1:
             return next(iter(result.values()))
