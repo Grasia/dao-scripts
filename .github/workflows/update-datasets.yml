@@ -1,0 +1,51 @@
+name: Update datawarehouse datasets
+on:
+  schedule:
+  - cron: "42 0 * * *"
+  workflow_dispatch:
+jobs:
+  update_dw:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v4
+      with:
+        cache: 'pip'
+    - name: Install dao-scripts
+      run: pip install dao-scripts
+    - name: Get datawarehouse cache
+      id: cache-datawarehouse
+      uses: actions/cache@v3
+      with:
+        path: datawarehouse
+        key: ${{ runner.os }}-datawarehouse
+    - name: Obtain datawarehouse
+      run: dao-scripts
+      env:
+        DAOA_CC_API_KEY: ${{ secrets.DAOA_CC_API_KEY }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: datawarehouse
+        path: ./datawarehouse/
+  upload_dw:
+    runs-on: ubuntu-latest
+    environment: daviddavo
+    needs: [update_dw]
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: datawarehouse
+        path: ./datawarehouse/
+    - uses: actions/setup-python@v4
+      with:
+        cache: 'pip'
+    - name: Install dao-scripts
+      run: pip install dao-scripts
+    - name: Upload dataset
+      run: dao-utils-upload-dw
+      env:
+        KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+        KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        ZENODO_DEPOSITION_ID: ${{ secrets.ZENODO_DEPOSITION_ID }}
+        ZENODO_API_TOKEN: ${{ secrets.ZENODO_API_TOKEN }}
