@@ -1,6 +1,28 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.1.10 - 2023-07-19
+- Stopped using daohaus-stats endpoint
+- Removed some fields from DAOHaus data
+  - moloches
+    - title
+    - timestamp (now createdAt)
+    - proposalCount
+    - memberCount
+    - voteCount
+    - rageQuitCount
+    - totalGas
+- Added some fields
+  - moloch
+    - createdAt (formerly timestamp)
+    - totalShares
+    - totalLoot
+    - guildBankAddress
+  - vote
+    - memberPower
+  - member
+    - tokenTribute
+
 ## 1.1.9 - 2023-05-11
 - Obtaining textual fields from DAOstack proposals
   - title

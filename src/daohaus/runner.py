@@ -38,12 +38,13 @@ class MembersCollector(GraphQLCollector):
             ds.Member.shares,
             ds.Member.loot,
             ds.Member.exists,
+            ds.Member.tokenTribute,
             ds.Member.didRagequit
         )
 
 class MolochesCollector(GraphQLCollector):
     def __init__(self, runner, network: str):
-        super().__init__('moloches', runner, network=network, endpoint=ENDPOINTS[network]['daohaus_stats'])
+        super().__init__('moloches', runner, network=network, endpoint=ENDPOINTS[network]['daohaus'])
 
         @self.postprocessor
         def moloch_id(df: pd.DataFrame) -> pd.DataFrame:
@@ -80,16 +81,15 @@ class MolochesCollector(GraphQLCollector):
         ds = self.schema
         return ds.Query.moloches(**add_where(kwargs, deleted=False)).select(
             ds.Moloch.id,
-            ds.Moloch.title,
+            # ds.Moloch.title, # Removed from daohaus-stats
             ds.Moloch.version,
             ds.Moloch.summoner,
             ds.Moloch.summoningTime,
-            ds.Moloch.timestamp,
-            ds.Moloch.proposalCount,
-            ds.Moloch.memberCount,
-            ds.Moloch.voteCount,
-            ds.Moloch.rageQuitCount,
-            ds.Moloch.totalGas
+            # ds.Moloch.timestamp, # Removed from daohaus-stats
+            ds.Moloch.createdAt,
+            ds.Moloch.totalShares,
+            ds.Moloch.guildBankAddress,
+            ds.Moloch.totalLoot,
         )
 
 class ProposalsCollector(GraphQLCollector):
@@ -198,6 +198,7 @@ class VoteCollector(GraphQLCollector):
             ds.Vote.proposal.select(ds.Proposal.id),
             ds.Vote.molochAddress,
             ds.Vote.memberAddress,
+            ds.Vote.memberPower,
             ds.Vote.uintVote
         )
 
