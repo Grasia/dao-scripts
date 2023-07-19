@@ -19,9 +19,7 @@ jobs:
         path: datawarehouse
         key: ${{ runner.os }}-datawarehouse
     - name: Obtain datawarehouse
-      run: dao-scripts
-      env:
-        DAOA_CC_API_KEY: ${{ secrets.DAOA_CC_API_KEY }}
+      run: dao-scripts --skip-token-balances
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
