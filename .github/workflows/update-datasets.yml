@@ -41,7 +41,7 @@ jobs:
         cache: 'pip'
         python-version: '3.11'
     - name: Install dao-scripts
-      run: pip install dao-scripts
+      run: pip install dao-scripts[upload]
     - name: Upload dataset
       run: dao-utils-upload-dw
       env:
