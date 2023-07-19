@@ -10,6 +10,7 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         cache: 'pip'
+        python-version: '3.11'
     - name: Install dao-scripts
       run: pip install dao-scripts
     - name: Get datawarehouse cache
@@ -38,6 +39,7 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         cache: 'pip'
+        python-version: '3.11'
     - name: Install dao-scripts
       run: pip install dao-scripts
     - name: Upload dataset

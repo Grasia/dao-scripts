@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.1.11 - 2023-07-19
+- Added utils scripts: `dao-utils-upload-dw`
+
 ## 1.1.10 - 2023-07-19
 - Stopped using daohaus-stats endpoint
 - Removed some fields from DAOHaus data
