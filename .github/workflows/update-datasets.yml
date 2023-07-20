@@ -13,16 +13,21 @@ jobs:
     - name: Install dao-scripts
       run: pip install dao-scripts
     - name: Get datawarehouse cache
-      id: cache-datawarehouse
-      uses: actions/cache@v3
+      id: restore-cache
+      uses: actions/cache/restore@v3
       with:
         path: datawarehouse
         key: ${{ runner.os }}-datawarehouse
     - name: Get cache info
-      if: steps.cache-datawarehouse.outputs.cache-hit =='true'
+      if: steps.restore-cache.outputs.cache-hit =='true'
       run: cat datawarehouse/update_date.txt datawarehouse/version.txt
     - name: Obtain datawarehouse
       run: dao-scripts --skip-token-balances
+    - name: Upload datawarehouse cache
+      uses: actions/cache/save@v3
+      with:
+        path: datawarehouse
+        key: ${{ steps.restore-cache.outputs.cache-primary-key }}
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
