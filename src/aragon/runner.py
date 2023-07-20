@@ -55,12 +55,12 @@ class CastsCollector(GraphQLCollector):
         ds = self.schema
         return ds.Query.casts(**kwargs).select(
             ds.Cast.id,
-            ds.Cast.vote.select(ds.Vote.id),
             ds.Cast.voter.select(ds.Voter.id),
             ds.Cast.supports,
             ds.Cast.stake,
             ds.Cast.createdAt,
             ds.Cast.vote.select(
+                ds.Vote.id,
                 ds.Vote.orgAddress,
                 ds.Vote.appAddress
             )
@@ -81,6 +81,8 @@ class OrganizationsCollector(GraphQLCollector):
 
         @self.postprocessor
         def apply_names(df: pd.DataFrame) -> pd.DataFrame:
+            if df.empty: return df
+
             names_dict = json.loads(self.DAO_NAMES)
 
             if self.network not in names_dict.keys() or \
@@ -98,6 +100,8 @@ class OrganizationsCollector(GraphQLCollector):
 
         @self.postprocessor
         def copy_id(df: pd.DataFrame) -> pd.DataFrame:
+            if df.empty: return df
+
             df['orgAddress'] = df['id']
             return df
 
@@ -133,6 +137,8 @@ class TokenHoldersCollector(GraphQLCollector):
 
         @self.postprocessor
         def add_minitokens(df: pd.DataFrame) -> pd.DataFrame:
+            if df.empty: return df
+
             tokens = runner.filterCollector(name='miniMeTokens', network=network).df
             tokens = tokens.rename(columns={'address':'tokenAddress', 'orgAddress':'organizationAddress'})
             return df.merge(tokens[['tokenAddress', 'organizationAddress']], on='tokenAddress', how='left')

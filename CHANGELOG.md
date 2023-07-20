@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## 1.1.12 - 2023-07-20
 - Ignoring info logs from `gql.transport.requests` as they took too much space (#3)
 - Saving version.txt and update_date.txt with a trailing newline to make printing to screen easier
+- Fixed aragon/casts #4
 
 ## 1.1.11 - 2023-07-19
 - Added utils scripts: `dao-utils-upload-dw`
