@@ -18,6 +18,9 @@ jobs:
       with:
         path: datawarehouse
         key: ${{ runner.os }}-datawarehouse
+    - name: Get cache info
+      if: steps.cache-datawarehouse.outputs.cache-hit =='true'
+      run: cat datawarehouse/update_date.txt datawarehouse/version.txt
     - name: Obtain datawarehouse
       run: dao-scripts --skip-token-balances
     - name: Upload artifact

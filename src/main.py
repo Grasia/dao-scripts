@@ -42,7 +42,8 @@ def _is_good_version(datawarehouse: Path) -> bool:
         return False
 
     with open(versionfile, 'r') as vf:
-        return vf.readline().startswith(config.CACHE_SCRIPTS_VERSION)
+        l = vf.readline().strip()
+        return l == config.CACHE_SCRIPTS_VERSION
 
 def main_aux(datawarehouse: Path):
     if config.delete_force or not _is_good_version(datawarehouse):
@@ -76,7 +77,7 @@ def main_aux(datawarehouse: Path):
 
     # The default config is every platform
     if not config.platforms:
-        config.platforms = AVAILABLE_PLATFORcache_scriptsMS.keys()
+        config.platforms = AVAILABLE_PLATFORMS.keys()
 
     # Now calling the platform and deleting if needed
     for p in config.platforms:
@@ -89,10 +90,10 @@ def main_aux(datawarehouse: Path):
         data_date = config.block_datetime.isoformat()
 
     with open(datawarehouse / 'update_date.txt', 'w') as f:
-        f.write(data_date)
+        print(data_date, file=f)
 
     with open(datawarehouse / 'version.txt', 'w') as f:
-        f.write(config.CACHE_SCRIPTS_VERSION)
+        print(config.CACHE_SCRIPTS_VERSION, file=f)
 
 def main_lock(datawarehouse: Path):
     datawarehouse.mkdir(exist_ok=True)
