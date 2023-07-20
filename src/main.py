@@ -7,6 +7,7 @@ import portalocker as pl
 import os
 import tempfile
 import shutil
+import sys
 from sys import stderr
 
 import logging
@@ -69,11 +70,15 @@ def main_aux(datawarehouse: Path):
     logger.addHandler(filehandler)
     logger.setLevel(level=logging.DEBUG if config.debug else logging.INFO)
 
+    logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG if config.debug else logging.WARNING)
+
     # Log errors to STDERR
     streamhandler = logging.StreamHandler(stderr)
     streamhandler.setLevel(logging.WARNING if config.debug else logging.ERROR)
     streamhandler.setFormatter(logging.Formatter(LOG_STREAM_FORMAT))
     logger.addHandler(streamhandler)
+
+    logging.info("Running dao-scripts with arguments: %s", sys.orig_argv)
 
     # The default config is every platform
     if not config.platforms:
