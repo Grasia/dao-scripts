@@ -100,3 +100,18 @@ You can select the chain to get data from with the `--networks` switch. For exam
 ```
 daoa-cache-scripts --networks xdai
 ```
+
+## Acknowledgements
+
+DAO-Analyzer is created under the umbrella of two research projects: Chain Community, funded by the Spanish Ministry of Science and Innovation (RTI2018‐096820‐A‐I00) and led by Javier Arroyo and Samer Hassan; and P2P Models, funded by the European Research Council (ERC-2017-STG 625 grant no.: 75920), led by Samer Hassan.
+
+## Cite as
+
+You can just cite one of our publications:
+
+> Javier Arroyo, David Davó, Elena Martínez-Vicente, Youssef Faqir-Rhazoui, and Samer Hassan (2022). "DAO-Analyzer: Exploring Activity and Participation in Blockchain Organizations.". Companion Publication of the 2022 Conference on Computer Supported Cooperative Work and Social Computing (CSCW'22 Companion). ACM, 193–196.
+
+Or, if you want to explicitly cite the application:
+
+> Arroyo, Javier, Davó, David, Faqir-Rhazoui, Youssef, & Martínez Vicente, Elena. (2023). DAO Analyzer. Zenodo. https://doi.org/10.5281/zenodo.7669689
+
