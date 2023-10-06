@@ -42,7 +42,11 @@ jobs:
     - name: Install dao-scripts
       run: pip install dao-scripts[upload]
     - name: Upload dataset
-      run: dao-utils-upload-dw
+      uses: nick-fields/retry@v2
+      with:
+        command: dao-utils-upload-dw
+        max_attempts: 3
+        retry_wait_seconds: 60
       env:
         KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
