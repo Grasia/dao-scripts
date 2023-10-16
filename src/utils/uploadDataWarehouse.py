@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 import shutil
 import json
+import requests
 
 from tqdm import tqdm
 
@@ -50,11 +51,23 @@ def uploadToZenodo(paths):
     z = Zenodo(None, sandbox=ZENODO_SANDBOX)
     z.update(ZENODO_DEPOSITION_ID, paths)
 
-def archiveToZenodo(tmpdir):
+def archiveToZenodo(tmpdir, max_retries: int):
     with tempfile.TemporaryDirectory() as zpath:
         zpath = Path(zpath)
         shutil.make_archive(zpath / 'archive', 'zip', tmpdir)
-        uploadToZenodo([zpath / 'archive.zip'])
+
+        i: int = 0
+        success: bool = False
+        while i < max_retries and not success:
+            try:
+                uploadToZenodo([zpath / 'archive.zip'])
+                success = True
+            except requests.exceptions.HTTPError as e:
+                if e.errno == 504:
+                    print(f"Retrying upload to Zenodo {i}/{max_retries}")
+                else:
+                    raise e
+            i += 1
 
 def uploadToKaggle(path, version_notes):
     from kaggle import api as k
@@ -89,6 +102,13 @@ def main():
         choices=[*available_repos, 'all'],
         help="Which repositories to upload the data",
     )
+    parser.add_argument(
+        '-z',
+        '--zenodo-max-retries',
+        type=int,
+        default=5,
+        help="Zenodo is known to return 504 error, this program will try and upload it again",
+    )
 
     args = parser.parse_args() 
     if args.repos == 'all':
@@ -101,7 +121,7 @@ def main():
         archivedw(DEFAULT_DATAWAREHOUSE, tmpdir)
         if 'zenodo' in args.repos:
             print("Uploading to zenodo")
-            archiveToZenodo(tmpdir)
+            archiveToZenodo(tmpdir, args.zenodo_max_retries)
         if 'kaggle' in args.repos:
             print("Uploading to kaggle")
             archiveToKaggle(tmpdir)
