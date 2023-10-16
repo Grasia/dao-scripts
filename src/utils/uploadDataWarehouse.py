@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import json
 import requests
+from time import sleep
 
 from tqdm import tqdm
 
@@ -51,7 +52,7 @@ def uploadToZenodo(paths):
     z = Zenodo(None, sandbox=ZENODO_SANDBOX)
     z.update(ZENODO_DEPOSITION_ID, paths)
 
-def archiveToZenodo(tmpdir, max_retries: int):
+def archiveToZenodo(tmpdir, max_retries: int, sleep_seconds: int = 60):
     with tempfile.TemporaryDirectory() as zpath:
         zpath = Path(zpath)
         shutil.make_archive(zpath / 'archive', 'zip', tmpdir)
@@ -65,6 +66,7 @@ def archiveToZenodo(tmpdir, max_retries: int):
             except requests.exceptions.HTTPError as e:
                 if e.errno == 504:
                     print(f"Retrying upload to Zenodo {i}/{max_retries}")
+                    sleep(sleep_seconds)
                 else:
                     raise e
             i += 1
