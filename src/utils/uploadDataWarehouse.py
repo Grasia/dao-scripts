@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 import tempfile
 from pathlib import Path
 import shutil
@@ -50,7 +51,12 @@ def uploadToZenodo(paths):
     from zenodo_client import Zenodo
 
     z = Zenodo(None, sandbox=ZENODO_SANDBOX)
-    z.update(ZENODO_DEPOSITION_ID, paths)
+    try:
+        z.update(ZENODO_DEPOSITION_ID, paths)
+    except requests.exceptions.HTTPError as e:
+        if 'errors' in e.response:
+            print(e.response['errors'], file=sys.stderr)
+        raise e
 
 def archiveToZenodo(tmpdir, max_retries: int, sleep_seconds: int = 60):
     with tempfile.TemporaryDirectory() as zpath:
