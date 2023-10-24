@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.1.14 - 2023-10-24
+- Updated uploadDataWarehouse.py to report Zenodo API errors
+- Skipped 1.1.13 to trigger CI
+
 ## 1.1.12 - 2023-07-20
 - Ignoring info logs from `gql.transport.requests` as they took too much space (#3)
 - Saving version.txt and update_date.txt with a trailing newline to make printing to screen easier
