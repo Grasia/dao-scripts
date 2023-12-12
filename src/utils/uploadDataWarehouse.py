@@ -54,8 +54,13 @@ def uploadToZenodo(paths):
     try:
         z.update(ZENODO_DEPOSITION_ID, paths)
     except requests.exceptions.HTTPError as e:
-        if 'errors' in e.response:
-            print(e.response['errors'], file=sys.stderr)
+        r = e.response.json()
+
+        if 'errors' in r:
+            for error in r['errors']:
+                print(f'Error using Zenodo API ({error["field"]}):', file=sys.stderr)
+                for msg in error['messages']:
+                    print('  ', msg, file=sys.stderr)
         raise e
 
 def archiveToZenodo(tmpdir, max_retries: int, sleep_seconds: int = 60):
