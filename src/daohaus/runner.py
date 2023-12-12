@@ -120,8 +120,7 @@ class ProposalsCollector(GraphQLCollector):
             ds.Proposal.yesShares,
             ds.Proposal.noShares,
             # Textual information
-            ds.Proposal.title,
-            ds.Proposal.description,
+            ds.Proposal.details,
         )
     
 class RageQuitCollector(GraphQLCollector):

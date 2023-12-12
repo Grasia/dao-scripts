@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.2.1 - 2023-12-12
+- Fixed error that made impossible getting DAOhaus proposals
+
 ## 1.2.0 - 2023-12-12
 - Getting textual information from DAOhaus proposals
 - Getting textual information from Aragon proposals
