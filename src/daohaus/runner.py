@@ -118,7 +118,10 @@ class ProposalsCollector(GraphQLCollector):
             ds.Proposal.processedAt,
             ds.Proposal.didPass,
             ds.Proposal.yesShares,
-            ds.Proposal.noShares
+            ds.Proposal.noShares,
+            # Textual information
+            ds.Proposal.title,
+            ds.Proposal.description,
         )
     
 class RageQuitCollector(GraphQLCollector):

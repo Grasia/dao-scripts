@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.2.0 - 2023-12-12
+- Getting textual information from DAOhaus proposals
+- Getting textual information from Aragon proposals
+
 ## 1.1.14 - 2023-10-24
 - Updated uploadDataWarehouse.py to report Zenodo API errors
 - Skipped 1.1.13 to trigger CI

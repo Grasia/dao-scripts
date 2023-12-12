@@ -209,7 +209,9 @@ class VotesCollector(GraphQLCollector):
             ds.Vote.yea,
             ds.Vote.nay,
             ds.Vote.voteNum,
-            ds.Vote.votingPower
+            ds.Vote.votingPower,
+            # Textual information
+            ds.Vote.metadata,
         )
 
 class AragonRunner(GraphQLRunner):
