@@ -45,7 +45,8 @@ jobs:
       run: |
         FILE="$(python -c "from zenodo_client import api; print(api.__file__)")"
         echo "Modyfing file $FILE"
-        sed -i 's/_prepare_new_version(new_deposition_data\\["metadata"\\]\\["version"\\])/_prepare_new_version(new_deposition_data["metadata"].get("version", ""))/g' "$FILE"
+        sed -i 's/_prepare_new_version(new_deposition_data\["metadata"\]\["version"\])/_prepare_new_version(new_deposition_data["metadata"].get("version", ""))/g' "$FILE"
+        sed -i 's/json=new_deposition_data/json={"metadata": new_deposition_data\["metadata"\]}/g' "$FILE"
     - name: Upload dataset
       run: dao-utils-upload-dw
       env:
