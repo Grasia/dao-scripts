@@ -43,7 +43,9 @@ jobs:
       run: pip install 'dao-scripts[upload]>=1.1.14'
     - name: Patch Zenodo client (provisional)
       run: |
-        find . -wholename '*/zenodo_client/api.py' -exec sed -i 's/_prepare_new_version(new_deposition_data\\["metadata"\\]\\["version"\\])/_prepare_new_version(new_deposition_data["metadata"].get("version", ""))/g' {} +
+        FILE="$(python -c "from zenodo_client import api; print(api.__file__)")"
+        echo "Modyfing file $FILE"
+        sed -i 's/_prepare_new_version(new_deposition_data\["metadata"\]\["version"\])/_prepare_new_version(new_deposition_data["metadata"].get("version", ""))/g' $FILE
     - name: Upload dataset
       run: dao-utils-upload-dw
       env:
