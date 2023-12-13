@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.2.2 - 2023-12-13
+- Changed daohaus names cache folder
+
 ## 1.2.1 - 2023-12-12
 - Fixed error that made impossible getting DAOhaus proposals
 

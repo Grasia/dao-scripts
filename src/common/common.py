@@ -36,7 +36,7 @@ def solve_decimals(df: pd.DataFrame) -> pd.DataFrame:
 class Collector(ABC):
     INDEX = ['network', 'id']
     
-    def __init__(self, name:str, runner):
+    def __init__(self, name:str, runner: 'Runner'):
         self.name: str = name
         self.runner = runner
 
@@ -111,6 +111,11 @@ class Runner(ABC):
 
     def set_dw(self, dw) -> Path:
         self.__dw = dw
+
+    @property
+    def cache(self) -> Path:
+        # Common cache folder for everyone
+        return self.__dw / '.cache'
 
     @property
     def basedir(self) -> Path:

@@ -58,7 +58,7 @@ class MolochesCollector(GraphQLCollector):
             if config.skip_daohaus_names:
                 return df
 
-            cached = requests_cache.CachedSession(self.data_path.parent / '.names_cache', 
+            cached = requests_cache.CachedSession(self.runner.cache / 'daohaus_names_cache', 
                 use_cache_dir=False, 
                 expire_after=timedelta(days=30)
             )
