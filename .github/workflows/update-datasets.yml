@@ -30,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: daviddavo
     strategy:
+      fail-fast: false
       matrix:
         repo: ["zenodo","kaggle"]
     needs: [update_dw]
