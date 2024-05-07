@@ -106,11 +106,8 @@ class UpdatableCollector(Collector): # Flag class
     pass
 
 class Runner(ABC):
-    def __init__(self, dw: Path = Path()):
+    def __init__(self, dw: Path):
         self.__dw: Path = dw
-
-    def set_dw(self, dw) -> Path:
-        self.__dw = dw
 
     @property
     def cache(self) -> Path:
@@ -129,7 +126,7 @@ class Runner(ABC):
         raise NotImplementedError
 
 class NetworkRunner(Runner, ABC):
-    def __init__(self, dw = None):
+    def __init__(self, dw):
         super().__init__(dw)
         self.networks = {n for n,v in ENDPOINTS.items() if self.name in v and not n.startswith('_')}
 
@@ -140,7 +137,7 @@ class NetworkRunner(Runner, ABC):
     ) -> Iterable[Collector]:
         result = self.collectors
 
-        if config.only_updatable:
+        if config.run_only_updatable:
             result = filter(lambda c: isinstance(c, UpdatableCollector), result)
 
         # networks ^ (names v long_names)
@@ -171,7 +168,7 @@ class NetworkRunner(Runner, ABC):
 
     @staticmethod
     @retry(retry=retry_if_exception_type(TransportQueryError), wait=wait_exponential(max=10), stop=stop_after_attempt(3))
-    def validated_block(network: str, prev_block: Block = None) -> Block:
+    def validated_block(network: str, prev_block: Block = None, until_date: datetime = None) -> Block:
         requester = GQLRequester(ENDPOINTS[network]["_blocks"])
         ds = requester.get_schema()
 
@@ -187,10 +184,11 @@ class NetworkRunner(Runner, ABC):
             }
         }
 
-        if config.block_datetime:
+        # TODO: SET THE UNTIL_DATE
+        if until_date:
             del args["skip"]
             del args["where"]["number_gte"]
-            args["where"]["timestamp_lte"] = int(config.block_datetime.timestamp())
+            args["where"]["timestamp_lte"] = int(until_date.timestamp())
 
         response = requester.request(ds.Query.blocks(**args).select(
             ds.Block.id,
@@ -266,8 +264,9 @@ class NetworkRunner(Runner, ABC):
                     metadata[c.collectorid].last_update = datetime.now(timezone.utc)
                 except Exception as e:
                     metadata.errors[c.collectorid] = e.__str__()
-                    if config.ignore_errors:
-                        print(traceback.format_exc())
-                    else:
+                    if config.raise_runner_errors:
                         raise e
+                    else:
+                        # TODO: Use a logger instead
+                        print(traceback.format_exc(), file=sys.stderr)
             print(f'--- {self.name}\'s datawarehouse updated ---')

@@ -125,7 +125,7 @@ class RunnerMetadata:
                 "metadata": self.collectorMetaData,
                 "errors": self.errors
             }, f, 
-                indent=2 if config.debug else None, 
+                indent=2 if config.DEBUG else None, 
                 cls=MetadataEncoder)
 
     def ifdump(self):

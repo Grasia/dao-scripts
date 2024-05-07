@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from typing import Dict
+from typing import Dict, List
 
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +18,7 @@ from .daohaus.runner import DaohausRunner
 from .daostack.runner import DaostackRunner
 from .common import Runner, ENDPOINTS
 from .argparser import CacheScriptsArgParser
+from ._version import __version__
 from . import config
 
 LOG_FILE_FORMAT = "[%(levelname)s] - %(asctime)s - %(name)s - : %(message)s in %(pathname)s:%(lineno)d"
@@ -33,8 +34,7 @@ AVAILABLE_PLATFORMS: Dict[str, Runner] = {
 AVAILABLE_NETWORKS = {n for n in ENDPOINTS.keys() if not n.startswith('_')}
 
 def _call_platform(platform: str, datawarehouse: Path, force: bool=False, networks=None, collectors=None):
-    p = AVAILABLE_PLATFORMS[platform]()
-    p.set_dw(datawarehouse)
+    p = AVAILABLE_PLATFORMS[platform](datawarehouse)
     p.run(networks=networks, force=force, collectors=collectors)
 
 def _is_good_version(datawarehouse: Path) -> bool:
@@ -43,13 +43,16 @@ def _is_good_version(datawarehouse: Path) -> bool:
         return False
 
     with open(versionfile, 'r') as vf:
-        l = vf.readline().strip()
-        return l == config.CACHE_SCRIPTS_VERSION
+        return vf.readline().strip() == __version__
 
-def main_aux(datawarehouse: Path):
-    if config.delete_force or not _is_good_version(datawarehouse):
-        if not config.delete_force:
-            print(f"datawarehouse version is not version {config.CACHE_SCRIPTS_VERSION}, upgrading")
+def main_aux(
+    datawarehouse: Path, delete_force: bool, 
+    platforms: List[str], networks: List[str], collectors: List[str], 
+    block_datetime: datetime, force: bool, debug: bool = False,
+):
+    if delete_force or not _is_good_version(datawarehouse):
+        if not delete_force:
+            print(f"datawarehouse version is not version {__version__}, upgrading")
 
         # We skip the dotfiles like .lock
         for p in datawarehouse.glob('[!.]*'):
@@ -61,46 +64,47 @@ def main_aux(datawarehouse: Path):
     logger = logging.getLogger()
     logger.propagate = True
     filehandler = RotatingFileHandler(
-        filename=config.datawarehouse / 'cache_scripts.log',
-        maxBytes=config.LOGGING_MAX_MB * 2**20,
+        filename=datawarehouse / 'cache_scripts.log',
+        maxBytes=config.LOGGING_MAX_SIZE,
         backupCount=config.LOGGING_BACKUP_COUNT,
     )
 
     filehandler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
     logger.addHandler(filehandler)
-    logger.setLevel(level=logging.DEBUG if config.debug else logging.INFO)
+    logger.setLevel(level=logging.DEBUG if debug else logging.INFO)
 
-    logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG if config.debug else logging.WARNING)
+    logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG if debug else logging.WARNING)
 
     # Log errors to STDERR
     streamhandler = logging.StreamHandler(stderr)
-    streamhandler.setLevel(logging.WARNING if config.debug else logging.ERROR)
+    streamhandler.setLevel(logging.WARNING if debug else logging.ERROR)
     streamhandler.setFormatter(logging.Formatter(LOG_STREAM_FORMAT))
     logger.addHandler(streamhandler)
 
     logging.info("Running dao-scripts with arguments: %s", sys.orig_argv)
 
     # The default config is every platform
-    if not config.platforms:
-        config.platforms = AVAILABLE_PLATFORMS.keys()
+    if not platforms:
+        platforms = AVAILABLE_PLATFORMS.keys()
 
     # Now calling the platform and deleting if needed
-    for p in config.platforms:
-        _call_platform(p, datawarehouse, config.force, config.networks, config.collectors)
+    for p in platforms:
+        _call_platform(p, datawarehouse, force, networks, collectors)
 
     # write date
     data_date: str = str(datetime.now().isoformat())
 
-    if config.block_datetime:
-        data_date = config.block_datetime.isoformat()
+    if block_datetime:
+        data_date = block_datetime.isoformat()
 
     with open(datawarehouse / 'update_date.txt', 'w') as f:
         print(data_date, file=f)
 
     with open(datawarehouse / 'version.txt', 'w') as f:
-        print(config.CACHE_SCRIPTS_VERSION, file=f)
+        print(__version__, file=f)
 
-def main_lock(datawarehouse: Path):
+def main_lock(args):
+    datawarehouse = args.datawarehouse
     datawarehouse.mkdir(exist_ok=True)
     
     # Lock for the datawarehouse (also used by the dash)
@@ -126,7 +130,15 @@ def main_lock(datawarehouse: Path):
             with pl.Lock(p_lock, 'r', timeout=1, flags=pl.LOCK_SH | pl.LOCK_NB):
                 shutil.copytree(datawarehouse, tmp_dw, dirs_exist_ok=True, ignore=ignore)
 
-            main_aux(datawarehouse=tmp_dw)
+            main_aux(
+                datawarehouse=tmp_dw,
+                delete_force=args.delete_force,
+                platforms=args.platforms,
+                networks=args.networks,
+                collectors=args.collectors,
+                block_datetime=args.block_datetime,
+                force=args.force,
+            )
 
             with pl.Lock(p_lock, 'w', timeout=10):
                 shutil.copytree(tmp_dw, datawarehouse, dirs_exist_ok=True, ignore=ignore)
@@ -145,13 +157,14 @@ def main():
         available_platforms=list(AVAILABLE_PLATFORMS.keys()),
         available_networks=AVAILABLE_NETWORKS)
 
-    config.populate_args(parser.parse_args())
+    args = parser.parse_args()
+    config.args2config(args)
 
-    if config.display_version:
-        print(config.CACHE_SCRIPTS_VERSION)
+    if args.display_version:
+        print(__version__)
         exit(0)
 
-    main_lock(config.datawarehouse)
+    main_lock(args)
 
 if __name__ == '__main__':
     main()

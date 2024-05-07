@@ -55,7 +55,7 @@ class MolochesCollector(GraphQLCollector):
         def moloch_names(df: pd.DataFrame) -> pd.DataFrame:
             df = df.rename(columns={"title":"name"})
 
-            if config.skip_daohaus_names:
+            if config.daohaus.skip_names:
                 return df
 
             cached = requests_cache.CachedSession(self.runner.cache / 'daohaus_names_cache', 
@@ -207,8 +207,8 @@ class VoteCollector(GraphQLCollector):
 class DaohausRunner(GraphQLRunner):
     name: str = 'daohaus'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, dw):
+        super().__init__(dw)
         self._collectors: List[Collector] = []
         for n in self.networks:
             self._collectors.extend([

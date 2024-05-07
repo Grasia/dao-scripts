@@ -60,9 +60,9 @@ class DaosCollector(GraphQLCollector):
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
 
-        where = { 'register': 'registered' }
-        if config.daostack_all:
-            where.pop('register')
+        where = dict()
+        if config.daostack.registered_only:
+            where['register'] = 'registered'
         
         return ds.Query.daos(**add_where(kwargs, **where)).select(
             ds.DAO.id,
@@ -265,8 +265,8 @@ class ReputationBurnsCollector(CommonRepEventCollector):
 class DaostackRunner(GraphQLRunner):
     name: str = 'daostack'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, dw):
+        super().__init__(dw)
         self._collectors: List[Collector] = []
         for n in self.networks:
             dc = DaosCollector(self, n)

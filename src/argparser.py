@@ -3,7 +3,6 @@ from typing import List
 
 from datetime import datetime
 import pathlib
-import os
 
 from . import config
 
@@ -26,13 +25,13 @@ class CacheScriptsArgParser(ArgumentParser):
             help="The platforms to update. Every platform is updated by default."
         )
         self.add_argument(
-            "--ignore-errors",
-            default=True,
+            "--raise-runner-errors",
+            default=False,
             action=BooleanOptionalAction,
             help="Whether to ignore errors and continue")
         self.add_argument(
             "-d", "--debug",
-            action='store_true', default=False,
+            dest="DEBUG", action='store_true', default=False,
             help="Shows debug info"
         )
         self.add_argument(
@@ -44,11 +43,6 @@ class CacheScriptsArgParser(ArgumentParser):
             "-F", "--delete-force",
             action="store_true", default=False,
             help="Removes the datawarehouse folder before doing anything"
-        )
-        self.add_argument(
-            "--skip-daohaus-names",
-            action="store_true", default=False,
-            help="Skips the step of getting Daohaus Moloch's names, which takes some time"
         )
         self.add_argument(
             "--skip-token-balances",
@@ -83,14 +77,8 @@ class CacheScriptsArgParser(ArgumentParser):
             default=config.DEFAULT_DATAWAREHOUSE
         )
         self.add_argument(
-            "--cc-api-key",
-            help="Set the CryptoCompare API key (overrides environment variable)",
-            required=False,
-            type=str,
-            default=os.getenv('DAOA_CC_API_KEY')
-        )
-        self.add_argument(
             "--only-updatable",
+            dest='run_only_updatable',
             help=SUPPRESS, # "Run only updatable collectors (only for testing)",
             action='store_true',
             required=False,
@@ -99,7 +87,14 @@ class CacheScriptsArgParser(ArgumentParser):
         self.add_argument(
             "--daostack-all",
             help="Obtain all DAOs in DAOstack, not only registered ones",
-            action='store_true',
+            action='store_false',
             required=False,
-            default=False,
+            # For the user is "daostack_all", for us is "registered only"
+            dest='daostack__registered_only',
+            default=True,
+        )
+        self.add_argument(
+            "--daohaus-skip-names",
+            action="store_true", default=False, dest='daohaus__skip_names',
+            help="Skips the step of getting Daohaus Moloch's names, which takes some time"
         )

@@ -15,7 +15,7 @@ You can set the API key using --cc-api-key argument or the DAOA_CC_API_KEY env v
 """
 
 def cc_postprocessor(df: pd.DataFrame) -> pd.DataFrame:
-    ccrequester = CryptoCompareRequester(api_key=config.cc_api_key)
+    ccrequester = CryptoCompareRequester(api_key=config.CC_API_KEY)
 
     tokenSymbols = df['symbol'].drop_duplicates()
 
@@ -41,7 +41,7 @@ def cc_postprocessor(df: pd.DataFrame) -> pd.DataFrame:
 class CCPricesCollector(Collector):
     def __init__(self, runner: NetworkRunner, name: str='tokenPrices'):
         super().__init__(name, runner)
-        self.requester = CryptoCompareRequester(api_key=config.cc_api_key)
+        self.requester = CryptoCompareRequester(api_key=config.CC_API_KEY)
 
     def verify(self) -> bool:
         if not self.requester.api_key:
