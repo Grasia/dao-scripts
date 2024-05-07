@@ -16,7 +16,8 @@ from logging.handlers import RotatingFileHandler
 from .aragon.runner import AragonRunner
 from .daohaus.runner import DaohausRunner
 from .daostack.runner import DaostackRunner
-from .common import Runner, ENDPOINTS
+from .common import ENDPOINTS
+from .common.graphql import NetworkRunner
 from .argparser import CacheScriptsArgParser
 from ._version import __version__
 from . import config
@@ -24,7 +25,7 @@ from . import config
 LOG_FILE_FORMAT = "[%(levelname)s] - %(asctime)s - %(name)s - : %(message)s in %(pathname)s:%(lineno)d"
 LOG_STREAM_FORMAT = "%(levelname)s: %(message)s"
 
-AVAILABLE_PLATFORMS: Dict[str, Runner] = {
+AVAILABLE_PLATFORMS: Dict[str, NetworkRunner] = {
     AragonRunner.name: AragonRunner,
     DaohausRunner.name: DaohausRunner,
     DaostackRunner.name: DaostackRunner
@@ -33,9 +34,9 @@ AVAILABLE_PLATFORMS: Dict[str, Runner] = {
 # Get available networks from Runners
 AVAILABLE_NETWORKS = {n for n in ENDPOINTS.keys() if not n.startswith('_')}
 
-def _call_platform(platform: str, datawarehouse: Path, force: bool=False, networks=None, collectors=None):
+def _call_platform(platform: str, datawarehouse: Path, force: bool=False, networks=None, collectors=None, block_datetime=None):
     p = AVAILABLE_PLATFORMS[platform](datawarehouse)
-    p.run(networks=networks, force=force, collectors=collectors)
+    p.run(networks=networks, force=force, collectors=collectors, until_date=block_datetime)
 
 def _is_good_version(datawarehouse: Path) -> bool:
     versionfile = datawarehouse / 'version.txt'
@@ -89,7 +90,7 @@ def main_aux(
 
     # Now calling the platform and deleting if needed
     for p in platforms:
-        _call_platform(p, datawarehouse, force, networks, collectors)
+        _call_platform(p, datawarehouse, force, networks, collectors, block_datetime)
 
     # write date
     data_date: str = str(datetime.now().isoformat())

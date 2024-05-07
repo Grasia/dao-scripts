@@ -216,7 +216,7 @@ class NetworkRunner(Runner, ABC):
                 traceback.print_exc()
         return verified
 
-    def run(self, networks: List[str] = [], force=False, collectors=None):
+    def run(self, networks: List[str] = [], force=False, collectors=None, until_date: datetime=None):
         self.basedir.mkdir(parents=True, exist_ok=True)
 
         print("Verifying collectors")
@@ -237,7 +237,11 @@ class NetworkRunner(Runner, ABC):
                         if c.network not in blocks:
                             # Getting a block more recent than the one in the metadata (just to narrow down the search)
                             print("Requesting a block number...", end='\r')
-                            blocks[c.network] = self.validated_block(c.network, None if force else metadata[c.collectorid].block)
+                            blocks[c.network] = self.validated_block(
+                                network=c.network, 
+                                prev_block=None if force else metadata[c.collectorid].block,
+                                until_date=until_date,
+                            )
                             print(f"Using block {blocks[c.network].id} for {c.network} (ts: {blocks[c.network].timestamp.isoformat()})")
 
                         print(f"Running collector {c.long_name} ({c.network})")
