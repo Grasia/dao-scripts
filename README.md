@@ -1,3 +1,18 @@
+<p align="center">
+    <a href="https://pypi.org/project/dao-scripts/">
+        <img src="https://img.shields.io/pypi/v/dao-scripts" alt="PyPI">
+    </a>
+    <a href="https://doi.org/10.5281/zenodo.10938359">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10938359.svg" alt="DOI 10.5281/zenodo.10938359.svg">
+    </a>
+    <a href="./LICENSE">
+      <img src="https://img.shields.io/github/license/grasia/dao-scripts" alt="License">
+    </a>
+    <a href="https://www.kaggle.com/datasets/daviddavo/dao-analyzer">
+      <img src="https://img.shields.io/badge/Kaggle-20BEFF?logo=Kaggle&logoColor=white" alt="Kaggle">
+    </a>
+</p>
+
 # DAO-Analyzer's cache-scripts
 
 ## Set-up & Running
