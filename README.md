@@ -122,16 +122,13 @@ daoa-cache-scripts --networks xdai
 <img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-ministerio.png?raw=true"
      alt="Logo Ministerio de Ciencia e Innovación. Gobierno de España"
      style="max-height: 3em"
->
-<img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-erc.png?raw=true"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-erc.png?raw=true"
      alt="Logotipo European Research Council"
      style="max-height: 3em"
->
-<img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-grasia.png?raw=true"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-grasia.png?raw=true"
      alt="Logo GRASIA UCM"
      style="max-height: 3em"
->
-<img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-ucm.png?raw=true"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-ucm.png?raw=true"
      alt="Logo Universidad Complutense de Madrid"
      style="max-height: 3em"
 >
