@@ -5,8 +5,7 @@ from gql.dsl import DSLField
 
 import pandas as pd
 
-from .common import Runner, NetworkCollector, UpdatableCollector, GQLRequester
-from .graphql import GraphQLCollector
+from .common import Runner, NetworkCollector, UpdatableCollector, GQLRequester, get_graph_url
 from ..metadata import Block
 from .. import config
 
@@ -35,8 +34,6 @@ def partial_query(q, w) -> DSLField:
 
 
 class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
-    URL_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/subgraphs/id/{subgraph_id}'
-    
     def __init__(
         self, 
         name: str,
@@ -49,15 +46,11 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
     ):
         super().__init__(name, runner, network)
 
-        self._endpoint: str = self.URL_TEMPLATE.format(
-            api_key=config.THE_GRAPH_API_KEY,
-            subgraph_id=subgraph_id,
-        )
         self._index_col: str = index or  'id'
         self._result_key: str = result_key or name
         self._postprocessors: list[Postprocessor] = []
         self._requester = GQLRequester(
-            endpoint=self._endpoint,
+            endpoint=get_graph_url(subgraph_id),
             pbar_enabled=pbar_enabled,
         )
 

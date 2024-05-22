@@ -20,6 +20,13 @@ from dao_analyzer import cache_scripts
 
 # To be able to obtain endpoints.json
 ENDPOINTS: Dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
+THE_GRAPH_URL_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/subgraphs/id/{subgraph_id}'
+
+def get_graph_url(subgraph_id: str) -> str:
+    return THE_GRAPH_URL_TEMPLATE.format(
+        api_key=config.THE_GRAPH_API_KEY,
+        subgraph_id=subgraph_id,
+    )
 
 def solve_decimals(df: pd.DataFrame) -> pd.DataFrame:
     """ Adds the balanceFloat column to the dataframe
@@ -173,7 +180,7 @@ class NetworkRunner(Runner, ABC):
     @staticmethod
     @retry(retry=retry_if_exception_type(TransportQueryError), wait=wait_exponential(max=10), stop=stop_after_attempt(3))
     def validated_block(network: str, prev_block: Block = None, until_date: datetime = None) -> Block:
-        requester = GQLRequester(ENDPOINTS[network]["_blocks"])
+        requester = GQLRequester(get_graph_url(ENDPOINTS[network]['_blocks']))
         ds = requester.get_schema()
 
         number_gte = prev_block.number if prev_block else 0
@@ -207,7 +214,7 @@ class NetworkRunner(Runner, ABC):
         return Block(response[0])
 
     @staticmethod
-    def _verifyCollectors(tocheck: Iterable[Collector]):
+    def _verifyCollectors(tocheck: Iterable[Collector]) -> Iterable[Collector]:
         verified = []
         for c in tqdm(list(tocheck), desc="Verifying"):
             try:
