@@ -14,10 +14,6 @@
         "blockscout": "https://blockscout.com/xdai/mainnet/api",
         "daostack": "Bnqq6ARphxg2rnAvjBrQGxCPNtDGiygv235GbRzZqwfb",
         "daohaus": "2GJY9uxsLQUCvgqSfy6QCLAJgM9P9kdxBUpwNcGs7nPR",
-        "aragon": "https://api.thegraph.com/subgraphs/name/1hive/aragon-xdai",
-        "aragon_tokens": "https://api.thegraph.com/subgraphs/name/grasia/aragon-tokens-xdai",
-        "aragon_voting": "https://api.thegraph.com/subgraphs/name/grasia/aragon-voting-xdai",
-        "aragon_finance": "https://api.thegraph.com/subgraphs/name/grasia/aragon-finance-xdai"
     },
     "polygon": {
         "_blocks": "4mJTujCUWKLd4SPBYE1YXbamfNSNRMyphk8tHzczYWf9",

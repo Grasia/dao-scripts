@@ -220,8 +220,6 @@ class AragonRunner(GraphQLRunner):
     def __init__(self, dw=None):
         super().__init__(dw)
         self._collectors: List[Collector] = []
-        ## TODO: Fix aragon-tokens xdai subgraph and redeploy
-        self.networks = ['mainnet']
 
         for n in self.networks: 
             self._collectors.extend([
