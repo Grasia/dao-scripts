@@ -62,19 +62,20 @@ def main_aux(
             else:
                 p.unlink()
 
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     logger.propagate = True
     filehandler = RotatingFileHandler(
         filename=datawarehouse / 'cache_scripts.log',
-        maxBytes=config.LOGGING_MAX_SIZE,
-        backupCount=config.LOGGING_BACKUP_COUNT,
+        maxBytes=int(config.LOGGING_MAX_SIZE),
+        backupCount=int(config.LOGGING_BACKUP_COUNT),
     )
 
     filehandler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
     logger.addHandler(filehandler)
-    logger.setLevel(level=logging.DEBUG if debug else logging.INFO)
 
-    logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG if debug else logging.WARNING)
+    if config.DEBUG:
+        logger.setLevel(level=logging.DEBUG)
+        logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG)
 
     # Log errors to STDERR
     streamhandler = logging.StreamHandler(stderr)

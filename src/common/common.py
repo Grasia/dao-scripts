@@ -41,6 +41,10 @@ class Collector(ABC):
         self.runner = runner
 
     @property
+    def logger(self):
+        return logging.getLogger(f'dao-analyzer.collectors.{self.collectorid}')
+
+    @property
     def data_path(self) -> Path:
         return self.runner.basedir / (self.name + '.arr')
 

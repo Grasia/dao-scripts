@@ -64,7 +64,7 @@ class CacheScriptsArgParser(ArgumentParser):
             help="Collectors to run. For example: aragon/casts"
         )
         self.add_argument(
-            "--block-datetime",
+            "-B", "--block-datetime",
             required=False,
             type=datetime.fromisoformat,
             help="Get data up to a block datetime (input in ISO format)"
