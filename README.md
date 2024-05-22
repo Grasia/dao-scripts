@@ -75,7 +75,7 @@ usage: daoa-cache-scripts [-h] [-V] [-p [{aragon,daohaus,daostack} ...]]
                           [--ignore-errors | --no-ignore-errors] [-d] [-f] [-F] [--skip-daohaus-names]
                           [-n {mainnet,arbitrum,xdai,polygon} [{mainnet,arbitrum,xdai,polygon} ...]]
                           [-c COLLECTORS [COLLECTORS ...]] [--block-datetime BLOCK_DATETIME]
-                          [-D DATAWAREHOUSE] [--cc-api-key CC_API_KEY]
+                          [-D DATAWAREHOUSE]
 
 Main script to populate dao-analyzer cache
 
@@ -98,8 +98,6 @@ options:
                         Get data up to a block datetime (input in ISO format)
   -D DATAWAREHOUSE, --datawarehouse DATAWAREHOUSE
                         Specifies the destination folder of the datawarehouse
-  --cc-api-key CC_API_KEY
-                        Set the CryptoCompare API key (overrides environment variable)
 ```
 
 ### Getting only data from a platform
