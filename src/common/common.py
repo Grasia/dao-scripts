@@ -42,7 +42,7 @@ class Collector(ABC):
 
     @property
     def logger(self):
-        return logging.getLogger(f'dao-analyzer.collectors.{self.collectorid}')
+        return logging.getLogger(f'dao_analyzer.collectors.{self.collectorid}')
 
     @property
     def data_path(self) -> Path:

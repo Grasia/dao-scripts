@@ -178,7 +178,7 @@ class CryptoCompareRequester:
             dynamic_ncols=True)
         
         if not api_key:
-            self.logger.warning('API key is not set')
+            self.logger.warning('CryptoCompare API key is not set')
             api_key = ""
 
         self.api_key = api_key

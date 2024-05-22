@@ -62,7 +62,7 @@ def main_aux(
             else:
                 p.unlink()
 
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('dao_analyzer')
     logger.propagate = True
     filehandler = RotatingFileHandler(
         filename=datawarehouse / 'cache_scripts.log',
