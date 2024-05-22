@@ -1,3 +1,18 @@
+<p align="center">
+    <a href="https://pypi.org/project/dao-scripts/">
+        <img src="https://img.shields.io/pypi/v/dao-scripts" alt="PyPI">
+    </a>
+    <a href="https://doi.org/10.5281/zenodo.10938359">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.10938359.svg" alt="DOI 10.5281/zenodo.10938359.svg">
+    </a>
+    <a href="./LICENSE">
+      <img src="https://img.shields.io/github/license/grasia/dao-scripts" alt="License">
+    </a>
+    <a href="https://www.kaggle.com/datasets/daviddavo/dao-analyzer">
+      <img src="https://img.shields.io/badge/Kaggle-20BEFF?logo=Kaggle&logoColor=white" alt="Kaggle">
+    </a>
+</p>
+
 # DAO-Analyzer's cache-scripts
 
 ## Set-up & Running
@@ -60,7 +75,7 @@ usage: daoa-cache-scripts [-h] [-V] [-p [{aragon,daohaus,daostack} ...]]
                           [--ignore-errors | --no-ignore-errors] [-d] [-f] [-F] [--skip-daohaus-names]
                           [-n {mainnet,arbitrum,xdai,polygon} [{mainnet,arbitrum,xdai,polygon} ...]]
                           [-c COLLECTORS [COLLECTORS ...]] [--block-datetime BLOCK_DATETIME]
-                          [-D DATAWAREHOUSE] [--cc-api-key CC_API_KEY]
+                          [-D DATAWAREHOUSE]
 
 Main script to populate dao-analyzer cache
 
@@ -83,8 +98,6 @@ options:
                         Get data up to a block datetime (input in ISO format)
   -D DATAWAREHOUSE, --datawarehouse DATAWAREHOUSE
                         Specifies the destination folder of the datawarehouse
-  --cc-api-key CC_API_KEY
-                        Set the CryptoCompare API key (overrides environment variable)
 ```
 
 ### Getting only data from a platform
@@ -103,7 +116,26 @@ daoa-cache-scripts --networks xdai
 
 ## Acknowledgements
 
-DAO-Analyzer is created under the umbrella of two research projects: Chain Community, funded by the Spanish Ministry of Science and Innovation (RTI2018‐096820‐A‐I00) and led by Javier Arroyo and Samer Hassan; and P2P Models, funded by the European Research Council (ERC-2017-STG 625 grant no.: 75920), led by Samer Hassan.
+<div align="center">
+<img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-ministerio.png?raw=true"
+     alt="Logo Ministerio de Ciencia e Innovación. Gobierno de España"
+     style="max-height: 3em"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-erc.png?raw=true"
+     alt="Logotipo European Research Council"
+     style="max-height: 3em"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-grasia.png?raw=true"
+     alt="Logo GRASIA UCM"
+     style="max-height: 3em"
+><img src="https://github.com/Grasia/dao-analyzer/blob/master/dao_analyzer/web/assets/logo-ucm.png?raw=true"
+     alt="Logo Universidad Complutense de Madrid"
+     style="max-height: 3em"
+>
+</div>
+
+DAO-Analyzer is created under the umbrella of multiple research projects: 
+- Chain Community, funded by the Spanish Ministry of Science and Innovation ([RTI2018‐096820‐A‐I00](https://produccioncientifica.ucm.es/proyectos/48103/detalle)) and led by Javier Arroyo and Samer Hassan
+- P2P Models, funded by the European Research Council (ERC-2017-STG 625 grant no.: 75920), led by Samer Hassan.
+- DAOapplications, funded by the Spanish Ministry of Science and Innovation ([PID2021-127956OB-I00](https://produccioncientifica.ucm.es/proyectos/551171/detalle)) and led by Javier Arroyo, Samer Hassan and maria Cruz Valiente
 
 ## Cite as
 

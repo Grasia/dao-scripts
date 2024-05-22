@@ -10,6 +10,8 @@ from .common import ENDPOINTS, NetworkCollector, NetworkRunner, Runner, Updatabl
 from .api_requester import GQLRequester
 from ..metadata import Block
 
+import warnings
+
 def add_where(d, **kwargs):
     """
     Adds the values specified in kwargs to the where inside d
@@ -127,6 +129,7 @@ class GraphQLCollector(NetworkCollector, UpdatableCollector):
             return self.query
 
     def run(self, force=False, block: Block = None, prev_block: Block = None):
+        warnings.warn('Running the GraphQLCollector class is deprecated and will be removed on June', DeprecationWarning)
         logging.info(f"Running GraphQLCollector with block: {block}, prev_block: {prev_block}")
         if block is None:
             block = Block()
