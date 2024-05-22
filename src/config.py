@@ -40,6 +40,7 @@ settings = Dynaconf(
         Validator('LOGGING_BACKUP_COUNT', cast=int, default=3),
         Validator('LOGGING_MAX_SIZE', cast=parse_size, default="100MB"),
         Validator('CC_API_KEY', default=""),
+        Validator('THE_GRAPH_API_KEY', default=""),
 
         # Can be overriden by argparser
         Validator('run_only_updatable', cast=bool, default=False),
