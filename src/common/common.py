@@ -71,7 +71,7 @@ class Collector(ABC):
         """ Updates the dataframe in `self.data_path` with the new data.
         """
         if df.empty:
-            logging.warning("Empty dataframe, not updating file")
+            self.logger.warning("Empty dataframe, not updating file")
             return
 
         if not self.data_path.is_file():
@@ -201,7 +201,7 @@ class NetworkRunner(Runner, ABC):
         ))["blocks"]
     
         if len(response) == 0:
-            logging.warning(f"Blocks query returned no response with args {args}")
+            self.logger.warning(f"Blocks query returned no response with args {args}")
             return prev_block
 
         return Block(response[0])
@@ -252,7 +252,7 @@ class NetworkRunner(Runner, ABC):
                         olderBlock = blocks[c.network] < metadata[c.collectorid].block
                         if not force and olderBlock:
                             print("Warning: Forcing because requesting an older block")
-                            logging.warning("Forcing because using an older block")
+                            self.logger.warning("Forcing because using an older block")
 
                         # Running the collector
                         c.run(

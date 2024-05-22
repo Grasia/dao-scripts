@@ -72,6 +72,7 @@ def main_aux(
 
     filehandler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
     logger.addHandler(filehandler)
+    logging.getLogger('gql.transport.requests').addHandler(filehandler)
 
     if config.DEBUG:
         logger.setLevel(level=logging.DEBUG)
@@ -82,8 +83,9 @@ def main_aux(
     streamhandler.setLevel(logging.WARNING if debug else logging.ERROR)
     streamhandler.setFormatter(logging.Formatter(LOG_STREAM_FORMAT))
     logger.addHandler(streamhandler)
+    logging.getLogger('gql.transport.requests').addHandler(streamhandler)
 
-    logging.info("Running dao-scripts with arguments: %s", sys.orig_argv)
+    logger.info("Running dao-scripts with arguments: %s", sys.orig_argv)
 
     # The default config is every platform
     if not platforms:
