@@ -3,7 +3,7 @@
         "_blocks": "https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks",
         "blockscout": "https://blockscout.com/eth/mainnet/api",
         "daostack": "43HtV3dXRLPX7GKyV7f8GMLhevPXBmnSvpGBRKyfr53k",
-        "daohaus": "https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus",
+        "daohaus": "2d3CDkKyxhpLDZRLWHMCvWp9cCYdWp4Y7g5ecaBmeqad",
         "aragon": "https://api.thegraph.com/subgraphs/name/aragon/aragon-mainnet",
         "aragon_tokens": "https://api.thegraph.com/subgraphs/name/grasia/aragon-tokens-mainnet",
         "aragon_voting": "https://api.thegraph.com/subgraphs/name/grasia/aragon-voting-mainnet",
@@ -13,7 +13,7 @@
         "_blocks": "https://api.thegraph.com/subgraphs/name/1hive/xdai-blocks",
         "blockscout": "https://blockscout.com/xdai/mainnet/api",
         "daostack": "Bnqq6ARphxg2rnAvjBrQGxCPNtDGiygv235GbRzZqwfb",
-        "daohaus": "https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus-xdai",
+        "daohaus": "2GJY9uxsLQUCvgqSfy6QCLAJgM9P9kdxBUpwNcGs7nPR",
         "aragon": "https://api.thegraph.com/subgraphs/name/1hive/aragon-xdai",
         "aragon_tokens": "https://api.thegraph.com/subgraphs/name/grasia/aragon-tokens-xdai",
         "aragon_voting": "https://api.thegraph.com/subgraphs/name/grasia/aragon-voting-xdai",
@@ -21,11 +21,11 @@
     },
     "polygon": {
         "_blocks": "https://api.thegraph.com/subgraphs/name/grasia/matic-blocks",
-        "daohaus": "https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus-matic"
+        "daohaus": "AkzZk4BsvfNRkRDtzz7Bc8TgktTJN4uv9tgfCehhE6fB"
     },
     "arbitrum": {
         "_blocks": "https://api.thegraph.com/subgraphs/name/grasia/arbitrum-blocks",
-        "daohaus": "https://api.thegraph.com/subgraphs/name/odyssy-automaton/daohaus-arbitrum"
+        "daohaus": "2c41cggebRCMzFiDqoqDwShZtz4xYucsFKbQnEiXUTzY"
     },
     "_theGraph": {
         "index-node": "https://api.thegraph.com/index-node/graphql"

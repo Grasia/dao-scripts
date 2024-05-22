@@ -19,14 +19,14 @@ from .. import config
 from ..common.common import solve_decimals
 from ..common.cryptocompare import cc_postprocessor
 
-from ..common import ENDPOINTS, Collector
-from ..common.graphql import GraphQLCollector, GraphQLRunner, add_where
+from ..common import ENDPOINTS, Collector, NetworkRunner
+from ..common.thegraph import TheGraphCollector, add_where
 
 DATA_ENDPOINT: str = "https://data.daohaus.club/dao/{id}"
 
-class MembersCollector(GraphQLCollector):
+class MembersCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('members', runner, network=network, endpoint=ENDPOINTS[network]['daohaus'])
+        super().__init__('members', network, ENDPOINTS[network]['daohaus'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -42,9 +42,9 @@ class MembersCollector(GraphQLCollector):
             ds.Member.didRagequit
         )
 
-class MolochesCollector(GraphQLCollector):
+class MolochesCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('moloches', runner, network=network, endpoint=ENDPOINTS[network]['daohaus'])
+        super().__init__('moloches', network, ENDPOINTS[network]['daohaus'], runner)
 
         @self.postprocessor
         def moloch_id(df: pd.DataFrame) -> pd.DataFrame:
@@ -92,9 +92,9 @@ class MolochesCollector(GraphQLCollector):
             ds.Moloch.totalLoot,
         )
 
-class ProposalsCollector(GraphQLCollector):
+class ProposalsCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('proposals', runner, network=network, endpoint=ENDPOINTS[network]["daohaus"])
+        super().__init__('proposals', network, ENDPOINTS[network]['daohaus'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -123,9 +123,9 @@ class ProposalsCollector(GraphQLCollector):
             ds.Proposal.details,
         )
     
-class RageQuitCollector(GraphQLCollector):
+class RageQuitCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('rageQuits', runner, network=network, endpoint=ENDPOINTS[network]["daohaus"])
+        super().__init__('rageQuits', network, ENDPOINTS[network]['daohaus'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -138,9 +138,9 @@ class RageQuitCollector(GraphQLCollector):
             ds.RageQuit.loot
         )
 
-class TokenBalancesCollector(GraphQLCollector):
+class TokenBalancesCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('tokenBalances', runner, network=network, endpoint=ENDPOINTS[network]["daohaus"])
+        super().__init__('tokenBalances', network, ENDPOINTS[network]['daohaus'], runner)
 
         @self.postprocessor
         def change_col_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -163,8 +163,8 @@ class TokenBalancesCollector(GraphQLCollector):
         
             return df
         
-        self.postprocessors.append(solve_decimals)
-        self.postprocessors.append(cc_postprocessor)
+        self.postprocessor(solve_decimals)
+        self.postprocessor(cc_postprocessor)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -184,9 +184,9 @@ class TokenBalancesCollector(GraphQLCollector):
             ds.TokenBalance.tokenBalance
         )
 
-class VoteCollector(GraphQLCollector):
+class VoteCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('votes', runner, network=network, endpoint=ENDPOINTS[network]["daohaus"])
+        super().__init__('votes', network, ENDPOINTS[network]['daohaus'], runner)
 
         @self.postprocessor
         def changeColumnNames(df: pd.DataFrame) -> pd.DataFrame:
@@ -204,7 +204,7 @@ class VoteCollector(GraphQLCollector):
             ds.Vote.uintVote
         )
 
-class DaohausRunner(GraphQLRunner):
+class DaohausRunner(NetworkRunner):
     name: str = 'daohaus'
 
     def __init__(self, dw):
