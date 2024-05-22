@@ -84,8 +84,9 @@ class GQLRequester:
         self.__transport = RequestsHTTPTransport(endpoint)
         self.__client: Client = Client(transport=self.__transport, fetch_schema_from_transport=introspection)
         self.pbar = IndexProgressBar if pbar_enabled else RequestProgressSpinner
+        self.logger = logging.getLogger('dao-scripts.gql-requester')
 
-        logging.debug(f"Invoked ApiRequester with endpoint: {endpoint}")
+        self.logger.debug(f"Invoked ApiRequester with endpoint: {endpoint}")
 
     def get_schema(self) -> DSLSchema:
         with self.__client:
@@ -99,7 +100,7 @@ class GQLRequester:
         if isinstance(query, DSLField):
             query = DSLQuery(query)
 
-        logging.debug(f"Requesting: {query}")
+        self.logger.debug(f"Requesting: {query}")
 
         if isinstance(query, DSLQuery):
             result = self.__client.execute(dsl_gql(query))
@@ -172,12 +173,12 @@ class CryptoCompareRequester:
     BASEURL = 'https://min-api.cryptocompare.com/data/'
 
     def __init__(self, api_key: str = None, pbar_enabled: bool = True):
-        self.logger = logging.getLogger('ccrequester')
+        self.logger = logging.getLogger('dao-scripts.ccrequester')
         self.pbar = partial(tqdm, delay=1, file=sys.stdout, desc="Requesting",
             dynamic_ncols=True)
         
         if not api_key:
-            logging.warning(f'Invalid api key: {api_key}')
+            self.logger.warning('API key is not set')
             api_key = ""
 
         self.api_key = api_key
@@ -204,7 +205,7 @@ class CryptoCompareRequester:
             if 'Data' not in j:
                 return j
             if "HasWarning" in j and j["HasWarning"]:
-                logging.warning("Warning in query", r.url, ":", j["Message"])
+                self.logger.warning("Warning in query", r.url, ":", j["Message"])
             if j["Type"] == 100:
                 return j['Data']
         

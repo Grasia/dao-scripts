@@ -106,7 +106,7 @@ class GraphQLCollector(NetworkCollector, UpdatableCollector):
 
         if not skip_post:
             for post in self.postprocessors:
-                logging.debug(f"Running postprocessor {post.__name__}")
+                self.logger.debug(f"Running postprocessor {post.__name__}")
                 df = post(df)
                 if df is None:
                     raise ValueError(f"The postprocessor {post.__name__} returned None")

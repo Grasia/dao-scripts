@@ -45,7 +45,7 @@ class CCPricesCollector(Collector):
 
     def verify(self) -> bool:
         if not self.requester.api_key:
-            logging.warning(EMPTY_KEY_MSG)
+            self.logger.warning(EMPTY_KEY_MSG)
             return False
 
         return super().verify()
