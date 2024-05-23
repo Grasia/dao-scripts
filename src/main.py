@@ -16,8 +16,7 @@ from argparse import Namespace
 from .aragon.runner import AragonRunner
 from .daohaus.runner import DaohausRunner
 from .daostack.runner import DaostackRunner
-from .common import ENDPOINTS
-from .common.graphql import NetworkRunner
+from .common import ENDPOINTS, NetworkRunner
 from .argparser import CacheScriptsArgParser
 from ._version import __version__
 from . import config

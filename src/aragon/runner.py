@@ -16,13 +16,13 @@ import json
 
 from ..aragon import __name__ as aragon_module_name
 from ..common.cryptocompare import CCPricesCollector
-from ..common import ENDPOINTS, Collector
-from ..common.graphql import GraphQLCollector, GraphQLRunner
+from ..common import ENDPOINTS, Collector, NetworkRunner
+from ..common.thegraph import TheGraphCollector
 from ..common.blockscout import BlockscoutBallancesCollector
 
-class AppsCollector(GraphQLCollector):
+class AppsCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('apps', runner, endpoint=ENDPOINTS[network]['aragon'], network=network)
+        super().__init__('apps', network, ENDPOINTS[network]['aragon'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -39,9 +39,9 @@ class BalancesCollector(BlockscoutBallancesCollector):
     def __init__(self, runner, base, network: str):
         super().__init__(runner, addr_key='recoveryVault', base=base, network=network)
 
-class CastsCollector(GraphQLCollector):
+class CastsCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('casts', runner, endpoint=ENDPOINTS[network]['aragon_voting'], network=network, pbar_enabled=False)
+        super().__init__('casts', network, ENDPOINTS[network]['aragon_voting'], runner, pbar_enabled=False)
 
         @self.postprocessor
         def changeColumnNames(df: pd.DataFrame) -> pd.DataFrame:
@@ -66,11 +66,11 @@ class CastsCollector(GraphQLCollector):
             )
         )
 
-class OrganizationsCollector(GraphQLCollector):
+class OrganizationsCollector(TheGraphCollector):
     DAO_NAMES=pkgutil.get_data(aragon_module_name, 'dao_names.json')
 
     def __init__(self, runner, network: str):
-        super().__init__('organizations', runner, endpoint=ENDPOINTS[network]['aragon'], network=network)
+        super().__init__('organizations', network, ENDPOINTS[network]['aragon'], runner)
 
         @self.postprocessor
         def set_dead_recoveryVault(df: pd.DataFrame) -> pd.DataFrame:
@@ -113,9 +113,9 @@ class OrganizationsCollector(GraphQLCollector):
             ds.Organization.recoveryVault
         )
 
-class MiniMeTokensCollector(GraphQLCollector):
+class MiniMeTokensCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('miniMeTokens', runner, endpoint=ENDPOINTS[network]['aragon_tokens'], network=network, pbar_enabled=False)
+        super().__init__('miniMeTokens', network, ENDPOINTS[network]['aragon_tokens'], runner, pbar_enabled=False)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -131,9 +131,9 @@ class MiniMeTokensCollector(GraphQLCollector):
             ds.MiniMeToken.lastUpdateAt
         )
 
-class TokenHoldersCollector(GraphQLCollector):
-    def __init__(self, runner: GraphQLRunner, network: str):
-        super().__init__('tokenHolders', runner, endpoint=ENDPOINTS[network]['aragon_tokens'], network=network)
+class TokenHoldersCollector(TheGraphCollector):
+    def __init__(self, runner: NetworkRunner, network: str):
+        super().__init__('tokenHolders', network, ENDPOINTS[network]['aragon_tokens'], runner)
 
         @self.postprocessor
         def add_minitokens(df: pd.DataFrame) -> pd.DataFrame:
@@ -156,9 +156,9 @@ class TokenHoldersCollector(GraphQLCollector):
 class TokenPricesCollector(CCPricesCollector):
     pass
 
-class ReposCollector(GraphQLCollector):
+class ReposCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('repos', runner, network=network, endpoint=ENDPOINTS[network]['aragon'])
+        super().__init__('repos', network, ENDPOINTS[network]['aragon'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -170,9 +170,9 @@ class ReposCollector(GraphQLCollector):
             ds.Repo.appCount
         )
 
-class TransactionsCollector(GraphQLCollector):
+class TransactionsCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('transactions', runner, network=network, endpoint=ENDPOINTS[network]['aragon_finance'])
+        super().__init__('transactions', network, ENDPOINTS[network]['aragon_finance'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -188,9 +188,9 @@ class TransactionsCollector(GraphQLCollector):
             ds.Transaction.reference
         )
 
-class VotesCollector(GraphQLCollector):
+class VotesCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('votes', runner, network=network, endpoint=ENDPOINTS[network]['aragon_voting'])
+        super().__init__('votes', network, ENDPOINTS[network]['aragon_voting'], runner)
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -214,7 +214,7 @@ class VotesCollector(GraphQLCollector):
             ds.Vote.metadata,
         )
 
-class AragonRunner(GraphQLRunner):
+class AragonRunner(NetworkRunner):
     name: str = 'aragon'
 
     def __init__(self, dw=None):
@@ -229,11 +229,10 @@ class AragonRunner(GraphQLRunner):
                 ReposCollector(self, n),
                 TransactionsCollector(self, n),
                 TokenHoldersCollector(self, n),
-                VotesCollector(self, n)
+                VotesCollector(self, n),
+                oc := OrganizationsCollector(self, n),
+                BalancesCollector(self, oc, n),
             ])
-            oc = OrganizationsCollector(self, n)
-            bc = BalancesCollector(self, oc, n)
-            self._collectors += [oc, bc]
         
         self._collectors.append(CCPricesCollector(self))
 

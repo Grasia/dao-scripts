@@ -4,10 +4,10 @@
         "blockscout": "https://blockscout.com/eth/mainnet/api",
         "daostack": "43HtV3dXRLPX7GKyV7f8GMLhevPXBmnSvpGBRKyfr53k",
         "daohaus": "2d3CDkKyxhpLDZRLWHMCvWp9cCYdWp4Y7g5ecaBmeqad",
-        "aragon": "https://api.thegraph.com/subgraphs/name/aragon/aragon-mainnet",
-        "aragon_tokens": "https://api.thegraph.com/subgraphs/name/grasia/aragon-tokens-mainnet",
-        "aragon_voting": "https://api.thegraph.com/subgraphs/name/grasia/aragon-voting-mainnet",
-        "aragon_finance": "https://api.thegraph.com/subgraphs/name/grasia/aragon-finance-mainnet"
+        "aragon": "BjzJNAmbkpTN3422j5rh3Gv7aejkDfRH1QLyoJC3qTMZ",
+        "aragon_tokens": "EioF9792T18u3oqtt2Hfv5gYgw2Rp2qeqnrURP6deVHg",
+        "aragon_voting": "GBsV7wbrW9gTBjJhvBpML5Gcadtaj1fEnapB6NujNaai",
+        "aragon_finance": "7pHfNgz8XYHH2Uu9RdqqP8G29BCqi1VRgo3cdLzz59HZ"
     },
     "xdai": {
         "_blocks": "D58aXwnRLfosFtRaVJAbAjjvKZ11bEsbdiDLkJJRdSC9",

@@ -13,14 +13,13 @@ from .. import config
 from . import ENDPOINTS
 from .common import NetworkCollector, solve_decimals
 from .cryptocompare import cc_postprocessor
-from .graphql import GraphQLCollector
 
 MSG_NO_TOKENS_FOUND = "No tokens found"
 
 class BlockscoutBallancesCollector(NetworkCollector):
     ERR_SLEEP = 60
 
-    def __init__(self, runner, base: GraphQLCollector, name: str='tokenBalances', network: str='mainnet', addr_key: str='id'):
+    def __init__(self, runner, base: NetworkCollector, name: str='tokenBalances', network: str='mainnet', addr_key: str='id'):
         """ Initializes a ballance collector that uses blockscout
         
         Parameters:
