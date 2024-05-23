@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any
 
 import re
 
@@ -25,7 +25,7 @@ def parse_size(size):
 
 # TODO: Add some way of making very Runner capable of definig its config
 # there somehow
-_RUNNER_VALIDATORS: List[Validator] = [
+_RUNNER_VALIDATORS: list[Validator] = [
     Validator('daohaus.skip_names', cast=bool, default=False),
     
     Validator('daostack.registered_only', cast=bool, default=True),
@@ -56,10 +56,10 @@ def _sanitize_argname(name: str) -> str:
     return name.replace(".", "__")
 
 def args2config(args: Namespace):
-    args = vars(args)
+    argsdict: dict[str, Any] = vars(args)
 
     all_names = [ (vn,_sanitize_argname(vn)) for v in settings.validators for vn in v.names ]
-    settings_update = { vn:(args[an] or settings[vn]) for vn, an in all_names if an in args }
+    settings_update = { vn:(argsdict[an] or settings[vn]) for vn, an in all_names if an in argsdict }
 
     settings.update(settings_update)
 

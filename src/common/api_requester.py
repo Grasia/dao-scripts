@@ -17,7 +17,7 @@ from functools import partial
 import logging
 import sys
 from tqdm import tqdm
-from typing import Dict, List, Union, Iterable
+from typing import Optional, Union, Iterable, Callable
 
 class GQLQueryException(Exception):
     def __init__(self, errors, msg="Errors in GraphQL Query"):
@@ -93,7 +93,7 @@ class GQLRequester:
             assert(self.__client.schema is not None)
             return DSLSchema(self.__client.schema)
 
-    def request(self, query: Union[DSLQuery, DSLField, str]) -> Dict:
+    def request(self, query: Union[DSLQuery, DSLField, str]) -> dict:
         """
         Requests data from endpoint.
         """
@@ -112,14 +112,14 @@ class GQLRequester:
 
         return result
 
-    def request_single(self, q: Union[DSLQuery, DSLField, str]) -> Dict:
+    def request_single(self, q: Union[DSLQuery, DSLField, str]) -> dict:
         result = self.request(q)
         if result and len(result.values()) == 1:
             return next(iter(result.values()))
         else:
             raise 
 
-    def n_requests(self, query:DSLType, index='id', last_index: str = "", block_hash: str = None) -> List[Dict]:
+    def n_requests(self, query: Callable[..., DSLField], index='id', last_index: str = "", block_hash: Optional[str] = None) -> list[dict]:
         """
         Requests all chunks from endpoint.
 
@@ -129,8 +129,8 @@ class GQLRequester:
             * last_index: used to continue the request
             * block_hash: make the request to that block hash
         """
-        elements: List[Dict] = list()
-        result = Dict
+        elements: list[dict] = list()
+        result = dict()
         
         # do-while structure
         exit: bool = False
@@ -172,7 +172,7 @@ class CryptoCompareQueryException(Exception):
 class CryptoCompareRequester:
     BASEURL = 'https://min-api.cryptocompare.com/data/'
 
-    def __init__(self, api_key: str = None, pbar_enabled: bool = True):
+    def __init__(self, api_key: Optional[str] = None, pbar_enabled: bool = True):
         self.logger = logging.getLogger('dao-scripts.ccrequester')
         self.pbar = partial(tqdm, delay=1, file=sys.stdout, desc="Requesting",
             dynamic_ncols=True)
@@ -183,7 +183,7 @@ class CryptoCompareRequester:
 
         self.api_key = api_key
 
-    def _build_headers(self) -> Dict[str, str]:
+    def _build_headers(self) -> dict[str, str]:
         return {
           'Authorization': 'Apikey ' + self.api_key
         }

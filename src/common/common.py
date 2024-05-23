@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Dict, Iterable
+from typing import Optional, Iterable
 import logging
 import sys
 import json
@@ -19,7 +19,7 @@ from .. import config
 from dao_analyzer import cache_scripts
 
 # To be able to obtain endpoints.json
-ENDPOINTS: Dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
+ENDPOINTS: dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
 THE_GRAPH_URL_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/subgraphs/id/{subgraph_id}'
 
 def get_graph_url(subgraph_id: str) -> str:
@@ -121,6 +121,10 @@ class Runner(ABC):
         self.__dw: Path = dw
 
     @property
+    def logger(self):
+        return logging.getLogger(f'dao_analyzer.runner.{self.name}')
+
+    @property
     def cache(self) -> Path:
         # Common cache folder for everyone
         return self.__dw / '.cache'
@@ -130,7 +134,7 @@ class Runner(ABC):
         return self.__dw / self.name
 
     @property
-    def collectors(self) -> List[Collector]:
+    def collectors(self) -> list[Collector]:
         return []
 
     def run(self, **kwargs):
@@ -146,7 +150,7 @@ class NetworkRunner(Runner, ABC):
         names: Iterable[str] = [],
         long_names: Iterable[str] = []
     ) -> Iterable[Collector]:
-        result = self.collectors
+        result: Iterable[Collector] = self.collectors
 
         if config.run_only_updatable:
             result = filter(lambda c: isinstance(c, UpdatableCollector), result)
@@ -163,11 +167,11 @@ class NetworkRunner(Runner, ABC):
         return result
 
     def filterCollector(self,
-        collector_id: str = None,
-        network: str = None,
-        name: str = None,
-        long_name: str = None,
-    ) -> Collector:
+        collector_id: Optional[str] = None,
+        network: Optional[str] = None,
+        name: Optional[str] = None,
+        long_name: Optional[str] = None,
+    ) -> Optional[Collector]:
         if collector_id:
             return next((c for c in self.collectors if c.collectorid == collector_id), None)
 
@@ -177,9 +181,8 @@ class NetworkRunner(Runner, ABC):
             long_names=[long_name] if long_name else []
         ), None)
 
-    @staticmethod
     @retry(retry=retry_if_exception_type(TransportQueryError), wait=wait_exponential(max=10), stop=stop_after_attempt(3))
-    def validated_block(network: str, prev_block: Block = None, until_date: datetime = None) -> Block:
+    def validated_block(self, network: str, prev_block: Optional[Block] = None, until_date: Optional[datetime] = None) -> Optional[Block]:
         requester = GQLRequester(get_graph_url(ENDPOINTS[network]['_blocks']))
         ds = requester.get_schema()
 
@@ -227,7 +230,7 @@ class NetworkRunner(Runner, ABC):
                 traceback.print_exc()
         return verified
 
-    def run(self, networks: List[str] = [], force=False, collectors=None, until_date: datetime=None):
+    def run(self, networks: list[str] = [], force=False, collectors=None, until_date: Optional[datetime]=None):
         self.basedir.mkdir(parents=True, exist_ok=True)
 
         print("Verifying collectors")

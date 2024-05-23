@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from typing import Dict, List
-
 from datetime import datetime
 from pathlib import Path
 import portalocker as pl
@@ -12,6 +10,8 @@ from sys import stderr
 
 import logging
 from logging.handlers import RotatingFileHandler
+
+from argparse import Namespace
 
 from .aragon.runner import AragonRunner
 from .daohaus.runner import DaohausRunner
@@ -25,7 +25,7 @@ from . import config
 LOG_FILE_FORMAT = "[%(levelname)s] - %(asctime)s - %(name)s - : %(message)s in %(pathname)s:%(lineno)d"
 LOG_STREAM_FORMAT = "%(levelname)s: %(message)s"
 
-AVAILABLE_PLATFORMS: Dict[str, NetworkRunner] = {
+AVAILABLE_PLATFORMS: dict[str, type[NetworkRunner]] = {
     AragonRunner.name: AragonRunner,
     DaohausRunner.name: DaohausRunner,
     DaostackRunner.name: DaostackRunner
@@ -48,7 +48,7 @@ def _is_good_version(datawarehouse: Path) -> bool:
 
 def main_aux(
     datawarehouse: Path, delete_force: bool, 
-    platforms: List[str], networks: List[str], collectors: List[str], 
+    platforms: list[str], networks: list[str], collectors: list[str], 
     block_datetime: datetime, force: bool, debug: bool = False,
 ):
     if delete_force or not _is_good_version(datawarehouse):
@@ -89,11 +89,11 @@ def main_aux(
 
     # The default config is every platform
     if not platforms:
-        platforms = AVAILABLE_PLATFORMS.keys()
+        platforms = list(AVAILABLE_PLATFORMS.keys())
 
     # Now calling the platform and deleting if needed
-    for p in platforms:
-        _call_platform(p, datawarehouse, force, networks, collectors, block_datetime)
+    for platform in platforms:
+        _call_platform(platform, datawarehouse, force, networks, collectors, block_datetime)
 
     # write date
     data_date: str = str(datetime.now().isoformat())
@@ -107,7 +107,7 @@ def main_aux(
     with open(datawarehouse / 'version.txt', 'w') as f:
         print(__version__, file=f)
 
-def main_lock(args):
+def main_lock(args: Namespace):
     datawarehouse = args.datawarehouse
     datawarehouse.mkdir(exist_ok=True)
     
@@ -119,10 +119,10 @@ def main_lock(args):
 
     try:
         with pl.Lock(cs_lock, 'w', timeout=1) as lock, \
-             tempfile.TemporaryDirectory(prefix="datawarehouse_") as tmp_dw:
+             tempfile.TemporaryDirectory(prefix="datawarehouse_") as tmp_dw_str:
 
             # Writing pid and dir name to lock (debugging)
-            tmp_dw = Path(tmp_dw)
+            tmp_dw = Path(tmp_dw_str)
             print(os.getpid(), file=lock)
             print(tmp_dw, file=lock)
             lock.flush()

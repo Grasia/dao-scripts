@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Dict
+from typing import Callable, Optional
 from abc import ABC, abstractmethod
 
 import pandas as pd
@@ -95,7 +95,7 @@ class GraphQLCollector(NetworkCollector, UpdatableCollector):
         
         return df
 
-    def transform_to_df(self, data: List[Dict], skip_post: bool=False) -> pd.DataFrame:
+    def transform_to_df(self, data: list[dict], skip_post: bool=False) -> pd.DataFrame:
         df = pd.DataFrame.from_dict(pd.json_normalize(data))
 
         # For compatibility reasons we change from . to snake case
@@ -128,7 +128,7 @@ class GraphQLCollector(NetworkCollector, UpdatableCollector):
         else:
             return self.query
 
-    def run(self, force=False, block: Block = None, prev_block: Block = None):
+    def run(self, force=False, block: Block = None, prev_block: Optional[Block] = None):
         warnings.warn('Running the GraphQLCollector class is deprecated and will be removed on June', DeprecationWarning)
         logging.info(f"Running GraphQLCollector with block: {block}, prev_block: {prev_block}")
         if block is None:

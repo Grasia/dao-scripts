@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Any, TypeAlias
+from typing import Optional, Callable, Any
 from abc import ABC, abstractmethod
 
 from gql.dsl import DSLField
@@ -9,13 +9,13 @@ from .common import Runner, NetworkCollector, UpdatableCollector, GQLRequester, 
 from ..metadata import Block
 from .. import config
 
-Postprocessor: TypeAlias = Callable[[pd.DataFrame], pd.DataFrame]
+Postprocessor = Callable[[pd.DataFrame], pd.DataFrame]
 
 EMPTY_KEY_MSG = """
 Empty The Graph API key. You can obtain one from https://thegraph.com/docs/en/querying/managing-api-keys/
 """
 
-def add_where(d, **kwargs):
+def add_where(d: dict[str, Any], **kwargs):
     """
     Adds the values specified in kwargs to the where inside d
         Example: `**add_where(kwargs, deleted=False)`
@@ -27,7 +27,7 @@ def add_where(d, **kwargs):
     
     return d
 
-def partial_query(q, w) -> DSLField:
+def partial_query(q: Callable[..., DSLField], w: dict[str, Any]) -> Callable[..., DSLField]:
     def wrapper(**kwargs):
         return q(**add_where(kwargs, **w))
     return wrapper
@@ -111,13 +111,13 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
 
         return True
 
-    def query_cb(self, prev_block: Block = None):
+    def query_cb(self, prev_block: Optional[Block] = None):
         if prev_block:
             return partial_query(self.query, {'_change_block': {'number_gte': prev_block.number}})
         else:
             return self.query
 
-    def run(self, force=False, block: Block = None, prev_block: Block = None):
+    def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None):
         self.logger.info(f"Running The Graph collector with block: {block}, prev_block: {prev_block}")
         if block is None:
             block = Block()

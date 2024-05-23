@@ -3,7 +3,7 @@ import requests
 from functools import partial
 from tqdm import tqdm
 from time import sleep
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
 
@@ -45,7 +45,7 @@ class BlockscoutBallancesCollector(NetworkCollector):
     def endpoint(self) -> str:
         return ENDPOINTS[self.network]['blockscout']
 
-    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 3, block: Union[int, Block] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
+    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 3, block: Union[int, Block, None] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
         if retry >= maxretries:
             raise ValueError(f"Too many retries {retry}/{maxretries}")
 
@@ -102,7 +102,7 @@ class BlockscoutBallancesCollector(NetworkCollector):
             else:
                 raise ValueError(f"Requests failed for address {addr[:12]}... with status code {r.status_code}: {r.reason}")
 
-    def run(self, force=False, block: Block = None, prev_block: Block = None, **kwargs):
+    def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None, **kwargs):
         # For each of the DAOs in the df, get the token balance
         addresses = self.base.df[self.addr_key].drop_duplicates()
 
