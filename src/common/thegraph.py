@@ -5,7 +5,7 @@ from gql.dsl import DSLField
 
 import pandas as pd
 
-from .common import Runner, NetworkCollector, UpdatableCollector, GQLRequester, get_graph_url
+from .common import ENDPOINTS, Runner, NetworkCollector, UpdatableCollector, GQLRequester, get_graph_url
 from ..metadata import Block
 from .. import config
 
@@ -49,6 +49,7 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         self._index_col: str = index or  'id'
         self._result_key: str = result_key or name
         self._postprocessors: list[Postprocessor] = []
+        self._indexer_block: Optional[Block] = None
         self._requester = GQLRequester(
             endpoint=get_graph_url(subgraph_id),
             pbar_enabled=pbar_enabled,
@@ -101,6 +102,74 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
 
         return df
 
+    def check_deployment_health(self, deployment_id: str) -> bool:
+        _requester = GQLRequester(ENDPOINTS['_theGraph']['index-node'])
+        ds = _requester.get_schema()
+        q = ds.Query.indexingStatuses(subgraphs=[deployment_id]).select(
+            ds.SubgraphIndexingStatus.node,    
+            ds.SubgraphIndexingStatus.entityCount,
+            ds.SubgraphIndexingStatus.health,
+            ds.SubgraphIndexingStatus.subgraph,
+            ds.SubgraphIndexingStatus.synced,
+            ds.SubgraphIndexingStatus.fatalError.select(
+                ds.SubgraphError.message,
+            ),
+            ds.SubgraphIndexingStatus.nonFatalErrors.select(
+                ds.SubgraphError.message,
+            ),
+            ds.SubgraphIndexingStatus.chains.select(
+                ds.ChainIndexingStatus.network,
+            ),
+        )
+
+        r: dict[str, Any] = _requester.request_single(q)[0]
+        
+        no_errors = True
+        assert r['subgraph'] == deployment_id, "Got response for other subgraph"
+        if r['fatalError']:
+            self.logger.error(f'Subgraph {deployment_id} has fatal error: {r["fatalError"]}')
+            no_errors = False
+
+        if r['health'] != 'healthy':
+            self.logger.error(f'Subgraph {deployment_id} is not healthy.')
+            no_errors = False
+
+        _network = r['chains'][0]['network']
+        if _network != self.network:
+            self.logger.error(f'Subgraph {deployment_id} is deployed on incorrect network. Expected {self.network} but got {_network}')
+            no_errors = False
+
+        if r['nonFatalErrors']:
+            self.logger.warning(f'Subgraph {deployment_id} has non fatal errors, check subgraph studio')
+
+        if not r['synced']:
+            self.logger.warning(f'Subgraph {deployment_id} is not synced. Check subgraph studio.')
+
+        return no_errors
+
+    def check_subgraph_health(self) -> bool:
+        ds = self.schema
+        q = ds.Query._meta().select(
+            ds._Meta_.deployment,
+            ds._Meta_.hasIndexingErrors,
+            ds._Meta_.block.select(
+                ds._Block_.hash,
+                ds._Block_.number,
+                ds._Block_.timestamp,
+            ),
+        )
+
+        r = self._requester.request_single(q)
+
+        if r['hasIndexingErrors']:
+            self.logger.error('Subgraph has indexing errors')
+            return False
+        
+        # TODO: Save the block info to use it later in run
+        self._indexer_block = Block(r['block'])
+        
+        return self.check_deployment_health(r['deployment'])
+
     def verify(self) -> bool:
         if not config.THE_GRAPH_API_KEY:
             self.logger.error('Empty The Graph api key')
@@ -109,7 +178,7 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         # Checking if the queryBuilder doesnt raise any errors
         self.query()
 
-        return True
+        return self.check_subgraph_health()
 
     def query_cb(self, prev_block: Optional[Block] = None):
         if prev_block:
@@ -119,6 +188,9 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
 
     def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None):
         self.logger.info(f"Running The Graph collector with block: {block}, prev_block: {prev_block}")
+        if block and self._indexer_block:
+            assert self._indexer_block >= block, "Block number is not indexed yet"
+        
         if block is None:
             block = Block()
         if prev_block is None or force:

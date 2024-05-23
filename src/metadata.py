@@ -26,7 +26,7 @@ class Block:
             self.id = init["id"] if "id" in init else self.id
 
             if "timestamp" in init:
-                if init["timestamp"].isdigit():
+                if isinstance(init['timestamp'], int) or init["timestamp"].isdigit():
                     self.timestamp = datetime.fromtimestamp(int(init["timestamp"]))
                 else:
                     self.timestamp = datetime.fromisoformat(init["timestamp"])
