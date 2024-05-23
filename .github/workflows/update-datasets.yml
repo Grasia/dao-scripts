@@ -7,13 +7,13 @@ jobs:
   update_dw:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
     - name: Install dao-scripts
       run: pip install dao-scripts
     - name: Get cached datawarehouse
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v3
       with:
         workflow: update-datasets.yml
         name: datawarehouse
@@ -22,7 +22,7 @@ jobs:
     - name: Obtain datawarehouse
       run: dao-scripts --skip-token-balances
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: datawarehouse
         path: ./datawarehouse/
@@ -36,13 +36,13 @@ jobs:
     needs: [update_dw]
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: datawarehouse
         path: ./datawarehouse/
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.12'
     - name: Install dao-scripts
       run: pip install 'dao-scripts[upload]>=1.1.14'
     - name: Patch Zenodo client (provisional)
