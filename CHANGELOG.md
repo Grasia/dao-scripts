@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.3.0 - 2024-04-24
+- Improved and standarized logging #10
+- The Graph Hosted Service sunsetting
+  - Added DAOA_THE_GRAPH_API_KEY variable (now needed)
+
 ## 1.2.2 - 2023-12-13
 - Changed daohaus names cache folder
 
