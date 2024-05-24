@@ -21,10 +21,17 @@ from dao_analyzer import cache_scripts
 # To be able to obtain endpoints.json
 ENDPOINTS: dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
 THE_GRAPH_URL_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/subgraphs/id/{subgraph_id}'
+THE_GRAPH_DEPLOYMENT_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/deployments/id/{deployment_id}'
 
 def get_graph_url(subgraph_id: str) -> str:
     if subgraph_id.startswith("http"):
         return subgraph_id
+
+    if subgraph_id.startswith("Qm"):
+        return THE_GRAPH_DEPLOYMENT_TEMPLATE.format(
+            api_key=config.THE_GRAPH_API_KEY,
+            deployment_id=subgraph_id,
+        )
 
     return THE_GRAPH_URL_TEMPLATE.format(
         api_key=config.THE_GRAPH_API_KEY,
