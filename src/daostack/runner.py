@@ -15,8 +15,8 @@ from .. import config
 from ..common.blockscout import BlockscoutBallancesCollector
 from ..common.cryptocompare import CCPricesCollector
 
-from ..common import ENDPOINTS, Collector
-from ..common.graphql import GraphQLCollector, GraphQLRunner, add_where
+from ..common import ENDPOINTS, Collector, NetworkRunner
+from ..common.thegraph import TheGraphCollector, add_where
 
 def _changeProposalColumnNames(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename(columns={
@@ -38,9 +38,9 @@ class BalancesCollector(BlockscoutBallancesCollector):
     def __init__(self, runner, base, network: str):
         super().__init__(runner, base=base, network=network, addr_key='dao')
 
-class DaosCollector(GraphQLCollector):
+class DaosCollector(TheGraphCollector):
     def __init__(self, runner, network: str):
-        super().__init__('daos', runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__('daos', network, ENDPOINTS[network]['daostack'], runner)
         
         @self.postprocessor
         def changeColumnNames(df: pd.DataFrame) -> pd.DataFrame:
@@ -72,9 +72,9 @@ class DaosCollector(GraphQLCollector):
             ds.DAO.nativeReputation.select(ds.Rep.id)
         )
 
-class ProposalsCollector(GraphQLCollector):
+class ProposalsCollector(TheGraphCollector):
     def __init__(self, runner, network: str, daoC: DaosCollector):
-        super().__init__('proposals', runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__('proposals', network, ENDPOINTS[network]['daostack'], runner)
 
         @self.postprocessor
         def changeColumnNames(df: pd.DataFrame) -> pd.DataFrame:
@@ -86,7 +86,7 @@ class ProposalsCollector(GraphQLCollector):
         def deleteColums(df: pd.DataFrame) -> pd.DataFrame:
             return df.drop(columns=['competition'], errors='ignore')
 
-        self.postprocessors.append(_remove_phantom_daos_wr(daoC))
+        self.postprocessor(_remove_phantom_daos_wr(daoC))
 
     @staticmethod
     def _stripGenesis(s: str):
@@ -139,12 +139,11 @@ class ProposalsCollector(GraphQLCollector):
             ds.Proposal.competition.select(ds.CompetitionProposal.id)
         )
 
-class ReputationHoldersCollector(GraphQLCollector):
+class ReputationHoldersCollector(TheGraphCollector):
     def __init__(self, runner, network: str, daoC: DaosCollector):
-        super().__init__('reputationHolders', runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__('reputationHolders', network, ENDPOINTS[network]['daostack'], runner)
         self.postprocessor(_changeProposalColumnNames)
-
-        self.postprocessors.append(_remove_phantom_daos_wr(daoC))
+        self.postprocessor(_remove_phantom_daos_wr(daoC))
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -157,12 +156,11 @@ class ReputationHoldersCollector(GraphQLCollector):
             ds.ReputationHolder.dao.select(ds.DAO.id)
         )
 
-class StakesCollector(GraphQLCollector):
+class StakesCollector(TheGraphCollector):
     def __init__(self, runner, network: str, daoC: DaosCollector):
-        super().__init__('stakes', runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__('stakes',network, ENDPOINTS[network]['daostack'], runner)
         self.postprocessor(_changeProposalColumnNames)
-    
-        self.postprocessors.append(_remove_phantom_daos_wr(daoC))
+        self.postprocessor(_remove_phantom_daos_wr(daoC))
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -179,12 +177,11 @@ class StakesCollector(GraphQLCollector):
 class TokenPricesCollector(CCPricesCollector):
     pass
 
-class VotesCollector(GraphQLCollector):
+class VotesCollector(TheGraphCollector):
     def __init__(self, runner, network: str, daoC: DaosCollector):
-        super().__init__('votes', runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__('votes', network, ENDPOINTS[network]['daostack'], runner)
         self.postprocessor(_changeProposalColumnNames)
-
-        self.postprocessors.append(_remove_phantom_daos_wr(daoC))
+        self.postprocessor(_remove_phantom_daos_wr(daoC))
 
     def query(self, **kwargs) -> DSLField:
         ds = self.schema
@@ -198,9 +195,9 @@ class VotesCollector(GraphQLCollector):
             ds.ProposalVote.proposal.select(ds.Proposal.id)
         )
 
-class CommonRepEventCollector(GraphQLCollector):
+class CommonRepEventCollector(TheGraphCollector):
     def __init__(self, name, runner, base, network: str): 
-        super().__init__(name, runner, network=network, endpoint=ENDPOINTS[network]['daostack'])
+        super().__init__(name, network, ENDPOINTS[network]['daostack'], runner)
         self.base = base
 
         @self.postprocessor
@@ -230,7 +227,7 @@ class CommonRepEventCollector(GraphQLCollector):
             
             return df
 
-        self.postprocessors.append(_remove_phantom_daos_wr(self.base))
+        self.postprocessor(_remove_phantom_daos_wr(self.base))
 
 class ReputationMintsCollector(CommonRepEventCollector):
     def __init__(self, *args, **kwargs):
@@ -262,7 +259,7 @@ class ReputationBurnsCollector(CommonRepEventCollector):
             ds.ReputationBurn.createdAt
         )
 
-class DaostackRunner(GraphQLRunner):
+class DaostackRunner(NetworkRunner):
     name: str = 'daostack'
 
     def __init__(self, dw):

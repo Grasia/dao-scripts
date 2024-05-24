@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-from typing import Dict, List
-
 from datetime import datetime
+import logging.handlers
 from pathlib import Path
 import portalocker as pl
 import os
@@ -11,21 +10,19 @@ import sys
 from sys import stderr
 
 import logging
-from logging.handlers import RotatingFileHandler
+
+from argparse import Namespace
 
 from .aragon.runner import AragonRunner
 from .daohaus.runner import DaohausRunner
 from .daostack.runner import DaostackRunner
-from .common import ENDPOINTS
-from .common.graphql import NetworkRunner
+from .common import ENDPOINTS, NetworkRunner
 from .argparser import CacheScriptsArgParser
 from ._version import __version__
+from .logging import setup_logging, finish_logging
 from . import config
 
-LOG_FILE_FORMAT = "[%(levelname)s] - %(asctime)s - %(name)s - : %(message)s in %(pathname)s:%(lineno)d"
-LOG_STREAM_FORMAT = "%(levelname)s: %(message)s"
-
-AVAILABLE_PLATFORMS: Dict[str, NetworkRunner] = {
+AVAILABLE_PLATFORMS: dict[str, type[NetworkRunner]] = {
     AragonRunner.name: AragonRunner,
     DaohausRunner.name: DaohausRunner,
     DaostackRunner.name: DaostackRunner
@@ -46,51 +43,19 @@ def _is_good_version(datawarehouse: Path) -> bool:
     with open(versionfile, 'r') as vf:
         return vf.readline().strip() == __version__
 
-def main_aux(
+def run_all(
     datawarehouse: Path, delete_force: bool, 
-    platforms: List[str], networks: List[str], collectors: List[str], 
-    block_datetime: datetime, force: bool, debug: bool = False,
+    platforms: list[str], networks: list[str], collectors: list[str], 
+    block_datetime: datetime, force: bool
 ):
-    if delete_force or not _is_good_version(datawarehouse):
-        if not delete_force:
-            print(f"datawarehouse version is not version {__version__}, upgrading")
-
-        # We skip the dotfiles like .lock
-        for p in datawarehouse.glob('[!.]*'):
-            if p.is_dir():
-                shutil.rmtree(p)
-            else:
-                p.unlink()
-
-    logger = logging.getLogger()
-    logger.propagate = True
-    filehandler = RotatingFileHandler(
-        filename=datawarehouse / 'cache_scripts.log',
-        maxBytes=config.LOGGING_MAX_SIZE,
-        backupCount=config.LOGGING_BACKUP_COUNT,
-    )
-
-    filehandler.setFormatter(logging.Formatter(LOG_FILE_FORMAT))
-    logger.addHandler(filehandler)
-    logger.setLevel(level=logging.DEBUG if debug else logging.INFO)
-
-    logging.getLogger('gql.transport.requests').setLevel(level=logging.DEBUG if debug else logging.WARNING)
-
-    # Log errors to STDERR
-    streamhandler = logging.StreamHandler(stderr)
-    streamhandler.setLevel(logging.WARNING if debug else logging.ERROR)
-    streamhandler.setFormatter(logging.Formatter(LOG_STREAM_FORMAT))
-    logger.addHandler(streamhandler)
-
-    logging.info("Running dao-scripts with arguments: %s", sys.orig_argv)
 
     # The default config is every platform
     if not platforms:
-        platforms = AVAILABLE_PLATFORMS.keys()
+        platforms = list(AVAILABLE_PLATFORMS.keys())
 
     # Now calling the platform and deleting if needed
-    for p in platforms:
-        _call_platform(p, datawarehouse, force, networks, collectors, block_datetime)
+    for platform in platforms:
+        _call_platform(platform, datawarehouse, force, networks, collectors, block_datetime)
 
     # write date
     data_date: str = str(datetime.now().isoformat())
@@ -104,8 +69,8 @@ def main_aux(
     with open(datawarehouse / 'version.txt', 'w') as f:
         print(__version__, file=f)
 
-def main_lock(args):
-    datawarehouse = args.datawarehouse
+def lock_and_run(args: Namespace):
+    datawarehouse: Path = args.datawarehouse
     datawarehouse.mkdir(exist_ok=True)
     
     # Lock for the datawarehouse (also used by the dash)
@@ -116,36 +81,63 @@ def main_lock(args):
 
     try:
         with pl.Lock(cs_lock, 'w', timeout=1) as lock, \
-             tempfile.TemporaryDirectory(prefix="datawarehouse_") as tmp_dw:
+             tempfile.TemporaryDirectory(prefix="datawarehouse_") as tmp_dw_str:
 
             # Writing pid and dir name to lock (debugging)
-            tmp_dw = Path(tmp_dw)
+            tmp_dw = Path(tmp_dw_str)
             print(os.getpid(), file=lock)
             print(tmp_dw, file=lock)
             lock.flush()
+            (datawarehouse / '.running').symlink_to(tmp_dw)
 
-            ignore = shutil.ignore_patterns('*.log', '.lock*')
+            # Used to tell the loggers to use errors.log or the main logs
+            copied_dw = False
 
-            # We want to copy the dw, so we open it as readers
-            p_lock.touch(exist_ok=True)
-            with pl.Lock(p_lock, 'r', timeout=1, flags=pl.LOCK_SH | pl.LOCK_NB):
-                shutil.copytree(datawarehouse, tmp_dw, dirs_exist_ok=True, ignore=ignore)
+            try:
+                ignore = shutil.ignore_patterns('.lock*', 'logs/*')
 
-            main_aux(
-                datawarehouse=tmp_dw,
-                delete_force=args.delete_force,
-                platforms=args.platforms,
-                networks=args.networks,
-                collectors=args.collectors,
-                block_datetime=args.block_datetime,
-                force=args.force,
-            )
+                # We want to copy the dw, so we open it as readers
+                p_lock.touch(exist_ok=True)
+                with pl.Lock(p_lock, 'r', timeout=1, flags=pl.LOCK_SH | pl.LOCK_NB):
+                    shutil.copytree(datawarehouse, tmp_dw, dirs_exist_ok=True, ignore=ignore)
 
-            with pl.Lock(p_lock, 'w', timeout=10):
-                shutil.copytree(tmp_dw, datawarehouse, dirs_exist_ok=True, ignore=ignore)
+                if args.delete_force or not _is_good_version(datawarehouse):
+                    if not args.delete_force:
+                        print(f"datawarehouse version is not version {__version__}, upgrading")
 
-            # Removing pid from lock
-            lock.truncate(0)
+                    # We skip the dotfiles like .lock
+                    for p in datawarehouse.glob('[!.]*'):
+                        if p.is_dir():
+                            shutil.rmtree(p)
+                        else:
+                            p.unlink()
+
+                setup_logging(tmp_dw, datawarehouse, config.DEBUG)
+                logger = logging.getLogger('dao_analyzer.main')
+                logger.info(">>> Running dao-scripts with arguments: %s", sys.orig_argv)
+
+                # Execute the scripts in the aux datawarehouse
+                run_all(
+                    datawarehouse=tmp_dw,
+                    delete_force=args.delete_force,
+                    platforms=args.platforms,
+                    networks=args.networks,
+                    collectors=args.collectors,
+                    block_datetime=args.block_datetime,
+                    force=args.force,
+                )
+
+                # Copying back the dw
+                logger.info(f"<<< Copying back the datawarehouse from {tmp_dw} to {datawarehouse}")
+                with pl.Lock(p_lock, 'w', timeout=10):
+                    shutil.copytree(tmp_dw, datawarehouse, dirs_exist_ok=True, ignore=ignore)
+                
+                copied_dw = True
+            finally:
+                # Removing pid from lock
+                lock.truncate(0)
+                (datawarehouse / '.running').unlink()
+                finish_logging(errors=not copied_dw)
     except pl.LockException:
         with open(cs_lock, 'r') as f:
             pid = int(f.readline())
@@ -165,7 +157,7 @@ def main():
         print(__version__)
         exit(0)
 
-    main_lock(args)
+    lock_and_run(args)
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Dict, Iterable
+from typing import Optional, Iterable
 import logging
 import sys
 import json
@@ -19,7 +19,24 @@ from .. import config
 from dao_analyzer import cache_scripts
 
 # To be able to obtain endpoints.json
-ENDPOINTS: Dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
+ENDPOINTS: dict = json.loads(pkgutil.get_data(cache_scripts.__name__, 'endpoints.json'))
+THE_GRAPH_URL_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/subgraphs/id/{subgraph_id}'
+THE_GRAPH_DEPLOYMENT_TEMPLATE = 'https://gateway-arbitrum.network.thegraph.com/api/{api_key}/deployments/id/{deployment_id}'
+
+def get_graph_url(subgraph_id: str) -> str:
+    if subgraph_id.startswith("http"):
+        return subgraph_id
+
+    if subgraph_id.startswith("Qm"):
+        return THE_GRAPH_DEPLOYMENT_TEMPLATE.format(
+            api_key=config.THE_GRAPH_API_KEY,
+            deployment_id=subgraph_id,
+        )
+
+    return THE_GRAPH_URL_TEMPLATE.format(
+        api_key=config.THE_GRAPH_API_KEY,
+        subgraph_id=subgraph_id,
+    )
 
 def solve_decimals(df: pd.DataFrame) -> pd.DataFrame:
     """ Adds the balanceFloat column to the dataframe
@@ -39,6 +56,10 @@ class Collector(ABC):
     def __init__(self, name:str, runner: 'Runner'):
         self.name: str = name
         self.runner = runner
+
+    @property
+    def logger(self):
+        return logging.getLogger(f'dao_analyzer.collectors.{self.collectorid}')
 
     @property
     def data_path(self) -> Path:
@@ -67,7 +88,7 @@ class Collector(ABC):
         """ Updates the dataframe in `self.data_path` with the new data.
         """
         if df.empty:
-            logging.warning("Empty dataframe, not updating file")
+            self.logger.warning("Empty dataframe, not updating file")
             return
 
         if not self.data_path.is_file():
@@ -110,6 +131,10 @@ class Runner(ABC):
         self.__dw: Path = dw
 
     @property
+    def logger(self):
+        return logging.getLogger(f'dao_analyzer.runner.{self.name}')
+
+    @property
     def cache(self) -> Path:
         # Common cache folder for everyone
         return self.__dw / '.cache'
@@ -119,7 +144,7 @@ class Runner(ABC):
         return self.__dw / self.name
 
     @property
-    def collectors(self) -> List[Collector]:
+    def collectors(self) -> list[Collector]:
         return []
 
     def run(self, **kwargs):
@@ -135,7 +160,7 @@ class NetworkRunner(Runner, ABC):
         names: Iterable[str] = [],
         long_names: Iterable[str] = []
     ) -> Iterable[Collector]:
-        result = self.collectors
+        result: Iterable[Collector] = self.collectors
 
         if config.run_only_updatable:
             result = filter(lambda c: isinstance(c, UpdatableCollector), result)
@@ -152,11 +177,11 @@ class NetworkRunner(Runner, ABC):
         return result
 
     def filterCollector(self,
-        collector_id: str = None,
-        network: str = None,
-        name: str = None,
-        long_name: str = None,
-    ) -> Collector:
+        collector_id: Optional[str] = None,
+        network: Optional[str] = None,
+        name: Optional[str] = None,
+        long_name: Optional[str] = None,
+    ) -> Optional[Collector]:
         if collector_id:
             return next((c for c in self.collectors if c.collectorid == collector_id), None)
 
@@ -166,10 +191,9 @@ class NetworkRunner(Runner, ABC):
             long_names=[long_name] if long_name else []
         ), None)
 
-    @staticmethod
     @retry(retry=retry_if_exception_type(TransportQueryError), wait=wait_exponential(max=10), stop=stop_after_attempt(3))
-    def validated_block(network: str, prev_block: Block = None, until_date: datetime = None) -> Block:
-        requester = GQLRequester(ENDPOINTS[network]["_blocks"])
+    def validated_block(self, network: str, prev_block: Optional[Block] = None, until_date: Optional[datetime] = None) -> Optional[Block]:
+        requester = GQLRequester(get_graph_url(ENDPOINTS[network]['_blocks']))
         ds = requester.get_schema()
 
         number_gte = prev_block.number if prev_block else 0
@@ -197,13 +221,13 @@ class NetworkRunner(Runner, ABC):
         ))["blocks"]
     
         if len(response) == 0:
-            logging.warning(f"Blocks query returned no response with args {args}")
+            self.logger.warning(f"Blocks query returned no response with args {args}")
             return prev_block
 
         return Block(response[0])
 
     @staticmethod
-    def _verifyCollectors(tocheck: Iterable[Collector]):
+    def _verifyCollectors(tocheck: Iterable[Collector]) -> Iterable[Collector]:
         verified = []
         for c in tqdm(list(tocheck), desc="Verifying"):
             try:
@@ -216,7 +240,7 @@ class NetworkRunner(Runner, ABC):
                 traceback.print_exc()
         return verified
 
-    def run(self, networks: List[str] = [], force=False, collectors=None, until_date: datetime=None):
+    def run(self, networks: list[str] = [], force=False, collectors=None, until_date: Optional[datetime]=None):
         self.basedir.mkdir(parents=True, exist_ok=True)
 
         print("Verifying collectors")
@@ -248,7 +272,7 @@ class NetworkRunner(Runner, ABC):
                         olderBlock = blocks[c.network] < metadata[c.collectorid].block
                         if not force and olderBlock:
                             print("Warning: Forcing because requesting an older block")
-                            logging.warning("Forcing because using an older block")
+                            self.logger.warning("Forcing because using an older block")
 
                         # Running the collector
                         c.run(

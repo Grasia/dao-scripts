@@ -1,10 +1,9 @@
 import pandas as pd
 import requests
-import logging
 from functools import partial
 from tqdm import tqdm
 from time import sleep
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
 
@@ -14,14 +13,13 @@ from .. import config
 from . import ENDPOINTS
 from .common import NetworkCollector, solve_decimals
 from .cryptocompare import cc_postprocessor
-from .graphql import GraphQLCollector
 
 MSG_NO_TOKENS_FOUND = "No tokens found"
 
 class BlockscoutBallancesCollector(NetworkCollector):
     ERR_SLEEP = 60
 
-    def __init__(self, runner, base: GraphQLCollector, name: str='tokenBalances', network: str='mainnet', addr_key: str='id'):
+    def __init__(self, runner, base: NetworkCollector, name: str='tokenBalances', network: str='mainnet', addr_key: str='id'):
         """ Initializes a ballance collector that uses blockscout
         
         Parameters:
@@ -37,7 +35,7 @@ class BlockscoutBallancesCollector(NetworkCollector):
 
     def verify(self) -> bool:
         if config.skip_token_balances:
-            logging.warning('Skipping token balances because --skip-token-balances flag was set')
+            self.logger.warning('Skipping token balances because --skip-token-balances flag was set')
             return False
         else:
             return super().verify()
@@ -46,7 +44,7 @@ class BlockscoutBallancesCollector(NetworkCollector):
     def endpoint(self) -> str:
         return ENDPOINTS[self.network]['blockscout']
 
-    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 3, block: Union[int, Block] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
+    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 3, block: Union[int, Block, None] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
         if retry >= maxretries:
             raise ValueError(f"Too many retries {retry}/{maxretries}")
 
@@ -83,32 +81,32 @@ class BlockscoutBallancesCollector(NetworkCollector):
             elif j['message'] == MSG_NO_TOKENS_FOUND:
                 return pd.DataFrame()
             else:
-                logging.warning(f"Status {j['status']}, message: {j['message']}")
+                self.logger.warning(f"Status {j['status']}, message: {j['message']}")
                 return pd.DataFrame()
         elif r.status_code == 429: # Too many requests
-            logging.warning(f"Too many requests, sleep and retry {retry}/{maxretries} time")
+            self.logger.warning(f"Too many requests, sleep and retry {retry}/{maxretries} time")
             sleep(self.ERR_SLEEP)
             return self._get_from_address(addr, retry=retry+1, maxretries=maxretries)
         elif r.status_code == 503:
-            logging.warning(f"Service unavailable, sleep and retry {retry}/{maxretries} time")
+            self.logger.warning(f"Service unavailable, sleep and retry {retry}/{maxretries} time")
             sleep(self.ERR_SLEEP)
             return self._get_from_address(addr, retry=retry+1, maxretries=maxretries)
         elif r.status_code == 504: # Gateway Time-out (Response too large)
-            logging.warning(f"Requests returned Gateway Time-out, ignoring response for addr {addr}")
+            self.logger.warning(f"Requests returned Gateway Time-out, ignoring response for addr {addr}")
             return pd.DataFrame() 
         else:
-            logging.error(f'Requests failed for address "{addr}" with status code {r.status_code}: {r.reason}')
+            self.logger.error(f'Requests failed for address "{addr}" with status code {r.status_code}: {r.reason}')
             if ignore_errors:
                 return pd.DataFrame()
             else:
                 raise ValueError(f"Requests failed for address {addr[:12]}... with status code {r.status_code}: {r.reason}")
 
-    def run(self, force=False, block: Block = None, prev_block: Block = None, **kwargs):
+    def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None, **kwargs):
         # For each of the DAOs in the df, get the token balance
         addresses = self.base.df[self.addr_key].drop_duplicates()
 
         if addresses.empty:
-            logging.warning("No addresses returned, not running blockscout collector")
+            self.logger.warning("No addresses returned, not running blockscout collector")
             return
 
         ptqdm = partial(tqdm, delay=1, desc="Requesting token balances", 

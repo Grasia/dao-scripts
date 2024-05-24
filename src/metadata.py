@@ -7,7 +7,7 @@
         <david@ddavo.me>
 """
 from json.encoder import JSONEncoder
-from typing import Dict
+from typing import Optional
 import json
 from functools import total_ordering
 from datetime import datetime, timezone
@@ -26,7 +26,7 @@ class Block:
             self.id = init["id"] if "id" in init else self.id
 
             if "timestamp" in init:
-                if init["timestamp"].isdigit():
+                if isinstance(init['timestamp'], int) or init["timestamp"].isdigit():
                     self.timestamp = datetime.fromtimestamp(int(init["timestamp"]))
                 else:
                     self.timestamp = datetime.fromisoformat(init["timestamp"])
@@ -56,7 +56,7 @@ class Block:
 
 class CollectorMetaData:
     def __init__(self, c: str, d = None):
-        self.block = Block()
+        self.block: Optional[Block] = Block()
         self._collector: str = c
         self.last_update: datetime = datetime.now(timezone.utc)
 
@@ -89,8 +89,8 @@ class MetadataEncoder(JSONEncoder):
 class RunnerMetadata:
     def __init__(self, runner):
         self._path = runner.basedir / 'metadata.json'
-        self.collectorMetaData: Dict[str, CollectorMetaData] = {}
-        self.errors: Dict[str, str] = {}
+        self.collectorMetaData: dict[str, CollectorMetaData] = {}
+        self.errors: dict[str, str] = {}
         self._setPrev()
 
     def _setPrev(self):
