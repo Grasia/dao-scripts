@@ -1,7 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 1.3.0 - 2024-04-24
+## 1.3.1 - 2024-05-27
+- Fixed bug with `--delete-force`
+
+## 1.3.0 - 2024-05-24
 - Improved and standarized logging #10
 - The Graph Hosted Service sunsetting
   - Added DAOA_THE_GRAPH_API_KEY variable (now needed)

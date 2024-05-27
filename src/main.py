@@ -44,7 +44,7 @@ def _is_good_version(datawarehouse: Path) -> bool:
         return vf.readline().strip() == __version__
 
 def run_all(
-    datawarehouse: Path, delete_force: bool, 
+    datawarehouse: Path,
     platforms: list[str], networks: list[str], collectors: list[str], 
     block_datetime: datetime, force: bool
 ):
@@ -101,12 +101,12 @@ def lock_and_run(args: Namespace):
                 with pl.Lock(p_lock, 'r', timeout=1, flags=pl.LOCK_SH | pl.LOCK_NB):
                     shutil.copytree(datawarehouse, tmp_dw, dirs_exist_ok=True, ignore=ignore)
 
-                if args.delete_force or not _is_good_version(datawarehouse):
+                if args.delete_force or not _is_good_version(tmp_dw):
                     if not args.delete_force:
                         print(f"datawarehouse version is not version {__version__}, upgrading")
 
-                    # We skip the dotfiles like .lock
-                    for p in datawarehouse.glob('[!.]*'):
+                    # We skip the dotfiles like .lock or .cache
+                    for p in tmp_dw.glob('[!.]*'):
                         if p.is_dir():
                             shutil.rmtree(p)
                         else:
@@ -119,7 +119,6 @@ def lock_and_run(args: Namespace):
                 # Execute the scripts in the aux datawarehouse
                 run_all(
                     datawarehouse=tmp_dw,
-                    delete_force=args.delete_force,
                     platforms=args.platforms,
                     networks=args.networks,
                     collectors=args.collectors,
