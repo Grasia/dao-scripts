@@ -21,6 +21,9 @@ jobs:
         if_no_artifact_found: warn
     - name: Obtain datawarehouse
       run: dao-scripts --skip-token-balances
+      env:
+        DAOA_THE_GRAPH_API_KEY: ${{ secrets.DAOA_THE_GRAPH_API_KEY }}
+        DAOA_CC_API_KEY: ${{ secrets.DAOA_CC_API_KEY }}
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -45,9 +48,6 @@ jobs:
         python-version: '3.12'
     - name: Install dao-scripts
       run: pip install 'dao-scripts[upload]>=1.1.14'
-      env:
-        DAOA_THE_GRAPH_API_KEY: ${{ secrets.DAOA_THE_GRAPH_API_KEY }}
-        DAOA_CC_API_KEY: ${{ secrets.DAOA_CC_API_KEY }}
     - name: Patch Zenodo client (provisional)
       run: |
         FILE="$(python -c "from zenodo_client import api; print(api.__file__)")"
