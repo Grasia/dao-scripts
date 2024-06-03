@@ -127,6 +127,7 @@ def main():
         '-D', '--debug',
         action='store_true',
         help='Enable debug logs',
+        default=os.environ.get('DAOA_DEBUG', False),
     )
 
     args = parser.parse_args() 

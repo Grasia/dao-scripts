@@ -45,6 +45,9 @@ jobs:
         python-version: '3.12'
     - name: Install dao-scripts
       run: pip install 'dao-scripts[upload]>=1.1.14'
+      env:
+        DAOA_THE_GRAPH_API_KEY: ${{ secrets.DAOA_THE_GRAPH_API_KEY }}
+        DAOA_CC_API_KEY: ${{ secrets.DAOA_CC_API_KEY }}
     - name: Patch Zenodo client (provisional)
       run: |
         FILE="$(python -c "from zenodo_client import api; print(api.__file__)")"
@@ -52,8 +55,9 @@ jobs:
         sed -i 's/_prepare_new_version(new_deposition_data\["metadata"\]\["version"\])/_prepare_new_version(new_deposition_data["metadata"].get("version", ""))/g' "$FILE"
         sed -i 's/json=new_deposition_data/json={"metadata": new_deposition_data\["metadata"\]}/g' "$FILE"
     - name: Upload dataset
-      run: dao-utils-upload-dw --debug ${{matrix.repo}}
+      run: dao-utils-upload-dw ${{matrix.repo}}
       env:
+        DAOA_DEBUG: ${{ runner.debug }}
         KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         ZENODO_DEPOSITION_ID: ${{ secrets.ZENODO_DEPOSITION_ID }}
