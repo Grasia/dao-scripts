@@ -99,7 +99,7 @@ def lock_and_run(args: Namespace):
             copied_dw = False
 
             try:
-                ignore = shutil.ignore_patterns('.lock*', 'logs/*')
+                ignore = shutil.ignore_patterns('*.lock', 'logs', '.running')
 
                 # We want to copy the dw, so we open it as readers
                 p_lock.touch(exist_ok=True)
@@ -134,7 +134,11 @@ def lock_and_run(args: Namespace):
                 # Copying back the dw
                 logger.info(f"<<< Copying back the datawarehouse from {tmp_dw} to {datawarehouse}")
                 with pl.Lock(p_lock, 'w', timeout=10):
-                    shutil.copytree(tmp_dw, datawarehouse, dirs_exist_ok=True, ignore=ignore)
+                    def verbose_copy(src, dst):
+                        logger.debug(f'Copying {src} to {Path(dst).absolute()}')
+                        return shutil.copy2(src, dst)
+                
+                    shutil.copytree(tmp_dw, datawarehouse, dirs_exist_ok=True, ignore=ignore, copy_function=verbose_copy)
                 
                 copied_dw = True
             finally:
