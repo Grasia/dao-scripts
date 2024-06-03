@@ -52,6 +52,10 @@ jobs:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
     steps:
+    - name: Skip Duplicate Actions
+      uses: fkirc/skip-duplicate-actions@v5
+      with:
+        concurrent_skipping: same_content_newer
     - name: Download built package
       uses: actions/download-artifact@v4
       with:
