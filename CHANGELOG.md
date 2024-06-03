@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.4.0 - 2024-06-03
+- Fixed bug when process was killed
+- Updated endpoint network names
+
 ## 1.3.1 - 2024-05-27
 - Fixed bug with `--delete-force`
 
