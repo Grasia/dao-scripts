@@ -250,7 +250,7 @@ class NetworkRunner(Runner, ABC):
         ))
         if not verified:
             # Nothing to do
-            return
+            raise ValueError(f"No collectors for runner {self.name} were valid. Please don't use this runner or fix the errors.")
 
         with RunnerMetadata(self) as metadata:
             print(f'--- Updating {self.name} datawarehouse ---')            
