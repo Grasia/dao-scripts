@@ -147,7 +147,7 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
 
         return no_errors
 
-    def check_subgraph_health(self) -> bool:
+    def check_subgraph_health(self, check_deployment: bool = True) -> bool:
         ds = self.schema
         q = ds.Query._meta().select(
             ds._Meta_.deployment,
@@ -167,6 +167,9 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         
         # TODO: Save the block info to use it later in run
         self._indexer_block = Block(r['block'])
+
+        if not check_deployment:
+            return True
         
         return self.check_deployment_health(r['deployment'])
 
@@ -188,6 +191,7 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
 
     def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None):
         self.logger.info(f"Running The Graph collector with block: {block}, prev_block: {prev_block}")
+        assert self.check_subgraph_health(check_deployment=False) # Just update the _indexer_block
         if block and self._indexer_block:
             assert self._indexer_block >= block, f"Block number {block} is not indexed yet ({self._indexer_block})"
         
