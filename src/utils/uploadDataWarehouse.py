@@ -7,6 +7,7 @@ import shutil
 import json
 import requests
 from time import sleep
+import logging
 
 from tqdm import tqdm
 
@@ -122,10 +123,26 @@ def main():
         default=5,
         help="Zenodo is known to return 504 error, this program will try and upload it again",
     )
+    parser.add_argument(
+        '-D', '--debug',
+        action='store_true',
+        help='Enable debug logs',
+    )
 
     args = parser.parse_args() 
     if args.repos == 'all':
         args.repos = available_repos
+
+    if args.debug:
+        from http.client import HTTPConnection
+        
+        # https://requests.readthedocs.io/en/latest/api/#api-changes
+        HTTPConnection.debuglevel = 1
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
+        requests_log = logging.getLogger('urllib3')
+        requests_log.setLevel(logging.DEBUG)
+        requests_log.propagate = True
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
