@@ -83,12 +83,17 @@ def lock_and_run(args: Namespace):
         with pl.Lock(cs_lock, 'w', timeout=1) as lock, \
              tempfile.TemporaryDirectory(prefix="datawarehouse_") as tmp_dw_str:
 
+            running_link = datawarehouse / '.running'
+            if running_link.exists():
+                print("Program was killed, removing aux files")
+                running_link.unlink()
+
             # Writing pid and dir name to lock (debugging)
             tmp_dw = Path(tmp_dw_str)
             print(os.getpid(), file=lock)
             print(tmp_dw, file=lock)
             lock.flush()
-            (datawarehouse / '.running').symlink_to(tmp_dw)
+            running_link.symlink_to(tmp_dw)
 
             # Used to tell the loggers to use errors.log or the main logs
             copied_dw = False
@@ -135,7 +140,7 @@ def lock_and_run(args: Namespace):
             finally:
                 # Removing pid from lock
                 lock.truncate(0)
-                (datawarehouse / '.running').unlink()
+                running_link.unlink()
                 finish_logging(errors=not copied_dw)
     except pl.LockException:
         with open(cs_lock, 'r') as f:
