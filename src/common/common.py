@@ -266,7 +266,7 @@ class NetworkRunner(Runner, ABC):
                                 prev_block=None if force else metadata[c.collectorid].block,
                                 until_date=until_date,
                             )
-                            print(f"Using block {blocks[c.network].id} for {c.network} (ts: {blocks[c.network].timestamp.isoformat()})")
+                            print(f"Using block number {blocks[c.network].number} ({blocks[c.network].id}) for {c.network} (ts: {blocks[c.network].timestamp.isoformat()})")
 
                         print(f"Running collector {c.long_name} ({c.network})")
                         olderBlock = blocks[c.network] < metadata[c.collectorid].block

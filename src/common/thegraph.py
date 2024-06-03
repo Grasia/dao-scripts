@@ -189,7 +189,7 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
     def run(self, force=False, block: Optional[Block] = None, prev_block: Optional[Block] = None):
         self.logger.info(f"Running The Graph collector with block: {block}, prev_block: {prev_block}")
         if block and self._indexer_block:
-            assert self._indexer_block >= block, "Block number is not indexed yet"
+            assert self._indexer_block >= block, f"Block number {block} is not indexed yet ({self._indexer_block})"
         
         if block is None:
             block = Block()
