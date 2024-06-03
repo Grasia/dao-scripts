@@ -15,11 +15,11 @@
         "daostack": "Bnqq6ARphxg2rnAvjBrQGxCPNtDGiygv235GbRzZqwfb",
         "daohaus": "2GJY9uxsLQUCvgqSfy6QCLAJgM9P9kdxBUpwNcGs7nPR"
     },
-    "polygon": {
+    "matic": {
         "_blocks": "4mJTujCUWKLd4SPBYE1YXbamfNSNRMyphk8tHzczYWf9",
         "daohaus": "AkzZk4BsvfNRkRDtzz7Bc8TgktTJN4uv9tgfCehhE6fB"
     },
-    "arbitrum": {
+    "arbitrum-one": {
         "_blocks": "AyY1GDtmAyavGWsdoHQ4vNoBCVWSqfDwHa6jPu5KdHgP",
         "daohaus": "2c41cggebRCMzFiDqoqDwShZtz4xYucsFKbQnEiXUTzY"
     },
