@@ -80,6 +80,7 @@ def archiveToZenodo(tmpdir, max_retries: int, sleep_seconds: int = 60):
                     print(f"Retrying upload to Zenodo {i}/{max_retries}")
                     sleep(sleep_seconds)
                 else:
+                    print("Errored response:", e.response.content, file=sys.stderr)
                     raise e
             i += 1
 
