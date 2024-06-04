@@ -2,6 +2,7 @@ from typing import Optional, Callable, Any
 from abc import ABC, abstractmethod
 
 from gql.dsl import DSLField
+from graphql.language import visit, Visitor
 
 import pandas as pd
 
@@ -32,6 +33,34 @@ def partial_query(q: Callable[..., DSLField], w: dict[str, Any]) -> Callable[...
         return q(**add_where(kwargs, **w))
     return wrapper
 
+class ColumnsVisitor(Visitor):
+    def __init__(self):
+        super().__init__()
+        self.columns = []
+        self._bases = []
+
+    def enter_field(self, node, *args):
+        self._bases.append(node)
+
+    def leave_field(self, node, *args):
+        self._bases.pop()
+
+    def leave_selection_set(self, node, *_args):
+        base = ".".join([x.name.value for x in self._bases])
+        for s in node.selections:
+            # Skip non-leaf nodes
+            if s.selection_set:
+                continue
+            name = s.name.value
+            fullname = ".".join([base, name]) if base else name
+            self.columns.append(fullname)
+    
+def get_columns_from_query(q: DSLField) -> list[str]:
+    c = ColumnsVisitor()
+    # We use selection_set directly to avoid putting the name of the query
+    # i.e: returning id instead of moloches.id
+    visit(q.ast_field.selection_set, c)
+    return c.columns
 
 class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
     def __init__(
@@ -83,7 +112,12 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         return df
 
     def transform_to_df(self, data: list[dict[str, Any]], skip_post: bool=False) -> pd.DataFrame:
-        df = pd.DataFrame.from_dict(pd.json_normalize(data))
+        if data:
+            df = pd.DataFrame.from_dict(pd.json_normalize(data))
+        else:
+            df = pd.DataFrame(columns=get_columns_from_query(self.query()))
+
+        assert set(df.columns) == set(get_columns_from_query(self.query()))
 
         # For compatibility reasons we change from . to snake case
         def dotsToSnakeCase(str: str) -> str:
@@ -165,7 +199,6 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
             self.logger.error('Subgraph has indexing errors')
             return False
         
-        # TODO: Save the block info to use it later in run
         self._indexer_block = Block(r['block'])
 
         if not check_deployment:
