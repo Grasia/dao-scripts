@@ -156,7 +156,7 @@ class TokenBalancesCollector(TheGraphCollector):
         def coalesce_bank_type(df: pd.DataFrame) -> pd.DataFrame:
             bank_idx = ['guildBank', 'memberBank', 'ecrowBank']
 
-            df['bank'] = df[bank_idx].idxmax(1)
+            df['bank'] = df[bank_idx].idxmax(1).astype(str)
             df['bank'] = df['bank'].str.lower()
             df['bank'] = df['bank'].str.replace('bank', '')
             df = df.drop(columns=bank_idx)
