@@ -44,7 +44,7 @@ class BlockscoutBallancesCollector(NetworkCollector):
     def endpoint(self) -> str:
         return ENDPOINTS[self.network]['blockscout']
 
-    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 3, block: Union[int, Block, None] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
+    def _get_from_address(self, addr: str, retry: int = 0, maxretries: int = 5, block: Union[int, Block, None] = None, ignore_errors=False) -> pd.DataFrame: # noqa: C901
         if retry >= maxretries:
             raise ValueError(f"Too many retries {retry}/{maxretries}")
 
