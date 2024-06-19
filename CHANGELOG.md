@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.1 - 2024-06-05
+- Multiple small bugfixes
+
 ## 1.5.0 - 2024-06-04
 - Avoid errors when no new data is available
 

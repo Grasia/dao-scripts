@@ -117,7 +117,8 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         else:
             df = pd.DataFrame(columns=get_columns_from_query(self.query()))
 
-        assert set(df.columns) == set(get_columns_from_query(self.query()))
+        if (s1 := set(df.columns)) != (s2 := set(get_columns_from_query(self.query()))):
+            raise ValueError(f"Received columns are not the expected columns: {s1} != {s2}")
 
         # For compatibility reasons we change from . to snake case
         def dotsToSnakeCase(str: str) -> str:
