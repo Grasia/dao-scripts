@@ -132,10 +132,10 @@ daoa-cache-scripts --networks xdai
 >
 </div>
 
-DAO-Analyzer is created under the umbrella of multiple research projects: 
+DAO-Analyzer is developed under the umbrella of multiple research projects: 
 - Chain Community, funded by the Spanish Ministry of Science and Innovation ([RTI2018‐096820‐A‐I00](https://produccioncientifica.ucm.es/proyectos/48103/detalle)) and led by Javier Arroyo and Samer Hassan
 - P2P Models, funded by the European Research Council (ERC-2017-STG 625 grant no.: 75920), led by Samer Hassan.
-- DAOapplications, funded by the Spanish Ministry of Science and Innovation ([PID2021-127956OB-I00](https://produccioncientifica.ucm.es/proyectos/551171/detalle)) and led by Javier Arroyo, Samer Hassan and maria Cruz Valiente
+- DAOapplications, funded by the Spanish Ministry of Science and Innovation ([PID2021-127956OB-I00](https://produccioncientifica.ucm.es/proyectos/551171/detalle)) and led by Javier Arroyo and Samer Hassan
 
 ## Cite as
 
