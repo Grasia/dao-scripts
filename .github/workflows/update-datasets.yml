@@ -47,7 +47,7 @@ jobs:
       with:
         python-version: '3.12'
     - name: Install dao-scripts
-      run: pip install 'dao-scripts[upload]>=1.1.14'
+      run: pip install 'dao-scripts[upload]>=1.5.2'
     - name: Patch Zenodo client (provisional)
       run: |
         FILE="$(python -c "from zenodo_client import api; print(api.__file__)")"
