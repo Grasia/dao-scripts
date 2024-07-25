@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.3 - 2024-07-25
+- Reverted pin down kaggle version
+
 ## 1.5.2 - 2024-07-24
 - Pin down kaggle version until [Kaggle/kaggle-api#611](https://github.com/Kaggle/kaggle-api/issues/611) is fixed
 
