@@ -22,8 +22,5 @@
     "arbitrum-one": {
         "_blocks": "AyY1GDtmAyavGWsdoHQ4vNoBCVWSqfDwHa6jPu5KdHgP",
         "daohaus": "2c41cggebRCMzFiDqoqDwShZtz4xYucsFKbQnEiXUTzY"
-    },
-    "_theGraph": {
-        "index-node": "https://api.thegraph.com/index-node/graphql"
     }
 }

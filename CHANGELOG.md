@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.4 - 2025-05-04
+- Quickfix: Temporarily removed deployment health check
+  - See [graphprotocol/graph-node#5983](https://github.com/graphprotocol/graph-node/issues/5983)
+
 ## 1.5.3 - 2024-07-25
 - Reverted pin down kaggle version
 

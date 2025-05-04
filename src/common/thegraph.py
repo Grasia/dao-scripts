@@ -138,6 +138,9 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         return df
 
     def check_deployment_health(self, deployment_id: str) -> bool:
+        # TODO(2025-05-04): Check again subgraph status
+        # Waiting for https://github.com/graphprotocol/graph-node/issues/5983
+        return True
         _requester = GQLRequester(ENDPOINTS['_theGraph']['index-node'])
         ds = _requester.get_schema()
         q = ds.Query.indexingStatuses(subgraphs=[deployment_id]).select(
