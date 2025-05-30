@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.5 - 2025-05-30
+- Updated aragon blocks endpoint
+
 ## 1.5.4 - 2025-05-04
 - Quickfix: Temporarily removed deployment health check
   - See [graphprotocol/graph-node#5983](https://github.com/graphprotocol/graph-node/issues/5983)
