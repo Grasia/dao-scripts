@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.6 - 2025-06-01
+- Added Python 3.13 support
+- Pinned down `gql` library
+
 ## 1.5.5 - 2025-05-30
 - Updated aragon blocks endpoint
 
