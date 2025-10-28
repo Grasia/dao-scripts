@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.7 - 2025-10-28
+- Fixed compatibility with NumPy 2.0 by replacing deprecated `np.NaN` with `np.nan`
+
 ## 1.5.6 - 2025-06-01
 - Added Python 3.13 support
 - Pinned down `gql` library

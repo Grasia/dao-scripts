@@ -28,9 +28,9 @@ def cc_postprocessor(df: pd.DataFrame) -> pd.DataFrame:
             row['ethValue'] = row['balanceFloat'] * df_fiat.loc[row['symbol'], 'ETH']
             row['eurValue'] = row['balanceFloat'] * df_fiat.loc[row['symbol'], 'EUR']
         else:
-            row['usdValue'] = np.NaN
-            row['ethValue'] = np.NaN
-            row['eurValue'] = np.NaN
+            row['usdValue'] = np.nan
+            row['ethValue'] = np.nan
+            row['eurValue'] = np.nan
         
         return row
 
