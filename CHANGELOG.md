@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.5.8 - 2025-10-28
+- Removed support for Python 3.9
+- Add Python 3.14 support
+
 ## 1.5.7 - 2025-10-28
 - Fixed compatibility with NumPy 2.0 by replacing deprecated `np.NaN` with `np.nan`
 
