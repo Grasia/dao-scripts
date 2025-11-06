@@ -35,7 +35,7 @@ settings = Dynaconf(
     envvar_prefix="DAOA",
     validate_on_update=True,
     validators=[
-        Validator('SKIP_INVALID_BLOCKS', cast=int, default=250),
+        Validator('SKIP_INVALID_BLOCKS', cast=int, default=300),
         Validator('DEFAULT_DATAWAREHOUSE', cast=Path, default=Path("datawarehouse")),
         Validator('LOGGING_BACKUP_COUNT', cast=int, default=3),
         Validator('LOGGING_MAX_SIZE', cast=parse_size, default="100MB"),
