@@ -123,8 +123,6 @@ class TheGraphCollector(NetworkCollector, UpdatableCollector, ABC):
         else:
             df = pd.DataFrame(columns=get_columns_from_query(self.query()))
 
-        import json; json.dump(data, open('debug_thegraph.json', 'w'), indent=2)
-        df.to_csv('debug_thegraph.csv')
         if (s1 := set(df.columns)) != (s2 := set(get_columns_from_query(self.query()))):
             if not (s1 - s2).issubset(get_bases_for_query(self.query())):
                 raise ValueError(f"Received columns are not the expected columns: {s1} != {s2}")

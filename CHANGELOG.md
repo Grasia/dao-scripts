@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# 1.5.10 - 2025-11-06
+- Fixed retrieving daostack proposals
+
 ## 1.5.9 - 2025-11-06
 - Augmented `SKIP_INVALID_BLOCKS` default to 300
 
