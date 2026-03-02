@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# 1.5.11 - 2026-03-02
+- Fixed error when getting schema
+
 # 1.5.10 - 2025-11-06
 - Fixed retrieving daostack proposals
 
