@@ -82,7 +82,13 @@ class GQLRequester:
 
     def __init__(self, endpoint: str, pbar_enabled: bool=True, introspection=True) -> None:
         self.__transport = RequestsHTTPTransport(endpoint)
-        self.__client: Client = Client(transport=self.__transport, fetch_schema_from_transport=introspection)
+        self.__client: Client = Client(
+            transport=self.__transport, 
+            fetch_schema_from_transport=introspection,
+            introspection_args={
+                "input_value_deprecation": False,
+            },
+        )
         self.pbar = IndexProgressBar if pbar_enabled else RequestProgressSpinner
         self.logger = logging.getLogger('dao-scripts.gql-requester')
 
